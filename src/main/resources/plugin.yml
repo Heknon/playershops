@@ -1,0 +1,10 @@
+name: PlayerShops
+version: ${project.version}
+main: me.oriharel.playershops.PlayerShops
+api-version: 1.13
+depend: [Kotlin, ShopGUIPlus, HolographicDisplays, SuperMobCoins, Vault]
+authors: [Heknon]
+description: Integrate custom PlayerShops into Minecraft https://trello.com/c/7oFqrHMF/3-player-shops
+website: https://oriharel.me
+commands:
+  playershops:

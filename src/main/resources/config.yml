@@ -1,0 +1,5 @@
+shop_default_material: ENCHANTING_TABLE
+shop_default_lore: [
+  "&7This is a shop"
+]
+shop_default_display_name: "&6PLAYER SHOP"
