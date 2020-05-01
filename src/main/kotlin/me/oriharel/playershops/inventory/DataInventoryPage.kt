@@ -4,7 +4,8 @@ import me.oriharel.playershops.inventory.item.InventoryItem
 
 class DataInventoryPage<T>(
         cancelOnClick: Boolean,
-        fillment: InventoryItem, override val parent: Inventory, override val inventoryItems: MutableList<InventoryItem>, override var dataHeld: T
+        fillment: InventoryItem, override val parent: Inventory, override val inventoryItems: MutableMap<InventoryLocation, InventoryItem>,
+        override val onClose: () -> kotlin.Unit, override var dataHeld: T
 ) : InventoryPage(
         cancelOnClick,
         fillment

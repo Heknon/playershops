@@ -1,6 +1,8 @@
 package me.oriharel.playershops.inventory
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 
 abstract class Inventory {
     private var currentPage: InventoryPage? = null
@@ -15,5 +17,11 @@ abstract class Inventory {
         nextPage.dataHeld = data
         currentPage = nextPage
         player.openInventory(currentPage!!.inventory)
+    }
+
+    companion object {
+        fun register(plugin: Plugin) {
+            Bukkit.getPluginManager().registerEvents(InventoryListeners(), plugin)
+        }
     }
 }

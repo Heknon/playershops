@@ -6,12 +6,13 @@ import me.oriharel.playershops.serializers.PlayerShopTypeAdapter
 import me.oriharel.playershops.serializers.ShopBankTypeAdapter
 import me.oriharel.playershops.serializers.UUIDTypeAdapter
 import me.oriharel.playershops.shops.PlayerShopFactory
-import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.bank.ShopBank
+import me.oriharel.playershops.shops.shop.PlayerShop
 import net.milkbowl.vault.economy.Economy
 import net.minecraft.server.v1_15_R1.NBTBase
 import net.minecraft.server.v1_15_R1.NBTTagCompound
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
@@ -64,17 +65,43 @@ object Utils {
         return ReflectionUtils.Fields.getFieldValueOfUnknownClass<ItemMeta>(itemStack, ItemStack::class.java, "meta")!!
     }
 
-    fun ItemStack.modifyMeta(applier: (ItemMeta) -> Unit) {
+    fun ItemStack.modifyMeta(applier: ((ItemMeta) -> Unit)?): ItemStack {
         val metaRef: ItemMeta = getItemStackMetaReference(this)
-        applier(metaRef)
+        applier?.invoke(metaRef)
+        metaRef.setDisplayName(ChatColor.translateAlternateColorCodes('&', metaRef.displayName))
+        if (metaRef.lore != null) metaRef.lore = metaRef.lore?.map { ChatColor.translateAlternateColorCodes('&', it) }
+        return this
     }
 
-    fun ItemStack.updateNBT(applier: (MutableMap<String?, NBTBase?>) -> Unit) {
+    @JvmOverloads
+    fun String?.toTitleCase(removeUnderscores: Boolean = true): String? {
+        if (this == null) return null
+        val stringBuilder = StringBuilder(this.length)
+        var prevChar = '$'
+        var firstChar = true
+
+        for (c in this) {
+            if (removeUnderscores && c == '_') stringBuilder.append(" ")
+            else if (firstChar || (prevChar == ' ' && c != ' ') || (removeUnderscores && prevChar == '_' && (c != ' ' || c != '_'))) stringBuilder.append(c.toUpperCase())
+            else stringBuilder.append(c.toLowerCase())
+            prevChar = c
+            firstChar = false
+        }
+
+        return stringBuilder.toString()
+    }
+
+    fun <E : Enum<E>> Enum<E>.toTitleCase(): String? {
+        return this.name.toTitleCase()
+    }
+
+    fun ItemStack.updateNBT(applier: ((MutableMap<String?, NBTBase?>) -> Unit)?): ItemStack {
         val nbtRef: MutableMap<String?, NBTBase?> = getItemStackUnhandledNBT(this)
-        applier(nbtRef)
+        applier?.invoke(nbtRef)
+        return this
     }
 
-    fun ItemStack.getNBTClone() : NBTTagCompound {
+    fun ItemStack.getNBTClone(): NBTTagCompound {
         return CraftItemStack.asNMSCopy(this).orCreateTag
     }
 

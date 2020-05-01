@@ -16,7 +16,7 @@ import kotlin.collections.HashMap
 
 class PlayerShopManager(private val playerShops: PlayerShops) {
     val shopCache: MutableMap<UUID, MutableMap<Long, PlayerShop>> = HashMap()
-    private val shopFactory: PlayerShopFactory = PlayerShopFactory(playerShops.economy)
+    val shopFactory: PlayerShopFactory = PlayerShopFactory(playerShops.economy)
     private val playerShopNamespacedKey: NamespacedKey = NamespacedKey(playerShops, "playerShop")
     private val playerShopPersistentDataType: PersistentDataType<String, PlayerShop> = PlayerShopPersistentDataType(this)
     val serializer = Utils.getSerializer<ShopBank, PlayerShop>(playerShops.economy, shopFactory)
@@ -68,6 +68,8 @@ class PlayerShopManager(private val playerShops: PlayerShops) {
         if (blockData !is TileState) return false
 
         blockData.persistentDataContainer.set(playerShopNamespacedKey, playerShopPersistentDataType, shop)
+        if (!shopCache.containsKey(block.world.uid)) shopCache[block.world.uid] = mutableMapOf()
+        shopCache[block.world.uid]!![block.location.toLong()] = shop
         return true
     }
 

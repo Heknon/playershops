@@ -8,6 +8,7 @@ import java.util.*
 
 abstract class MoneyShop(
         val bank: ShopBank?,
+        var price: Long,
         item: ItemStack,
         block: Block,
         owner: UUID,
@@ -22,7 +23,4 @@ abstract class MoneyShop(
 ) {
     protected val useInternalBank: Boolean = settings.contains(ShopSetting.USE_INTERNAL_BANK)
     protected val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS)
-    override fun opeInitializationGUI(player: Player) {
-        TODO("Not yet implemented")
-    }
 }

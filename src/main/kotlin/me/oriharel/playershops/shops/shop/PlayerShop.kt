@@ -1,12 +1,13 @@
 package me.oriharel.playershops.shops.shop
 
+import me.oriharel.playershops.shops.inventory.ShopInitializationInventory
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
 abstract class PlayerShop(
-        val item: ItemStack,
+        var item: ItemStack,
         val block: Block,
         val owner: UUID,
         val allowedMutators: MutableList<UUID>,
@@ -30,7 +31,14 @@ abstract class PlayerShop(
 
     protected abstract fun onPlace()
 
-    abstract fun opeInitializationGUI(player: Player)
+    fun opeInitializationGUI(player: Player) {
+        ShopInitializationInventory.inventory.open(player)
+        ShopInitializationInventory.inventory.manager.getContents(player).get().setProperty("shopBlock", block)
+    }
+
+    fun getType(): ShopType {
+        return if (this is BuyShop) ShopType.BUY else if (this is SellShop) ShopType.SELL else if (this is ShowcaseShop) ShopType.SHOWCASE else ShopType.BUY
+    }
 
     fun open(opener: UUID) {
         if (opener == owner) {
