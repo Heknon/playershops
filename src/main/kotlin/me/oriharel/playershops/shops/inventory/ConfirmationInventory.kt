@@ -1,10 +1,8 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.ClickableItem
-import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import fr.minuskube.inv.content.InventoryProvider
-import me.oriharel.playershops.utilities.KItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 

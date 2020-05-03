@@ -1,6 +1,5 @@
 package me.oriharel.playershops.shops.shop
 
-import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

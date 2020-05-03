@@ -1,8 +1,6 @@
 package me.oriharel.playershops.shops.shop
 
 import me.oriharel.playershops.shops.bank.ShopBank
-import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
-import me.oriharel.playershops.utilities.Utils.giveItem
 import me.oriharel.playershops.utilities.Utils.ifOnline
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.swanis.mobcoins.MobCoinsAPI

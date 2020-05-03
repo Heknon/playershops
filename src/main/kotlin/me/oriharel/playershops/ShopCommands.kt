@@ -5,7 +5,5 @@ import co.aikar.commands.annotation.CommandAlias
 
 @CommandAlias("playershops")
 class ShopCommands : BaseCommand() {
-    inner class Create {
-
-    }
+    inner class Create
 }

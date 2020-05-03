@@ -24,9 +24,9 @@ class PlayerShops : JavaPlugin() {
 
     override fun onEnable() {
         if (!setupEconomy()) {
-            this.logger.severe("Disabled due to no Vault dependency found!");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
+            this.logger.severe("Disabled due to no Vault dependency found!")
+            Bukkit.getPluginManager().disablePlugin(this)
+            return
         }
 
         signMenuFactory = SignMenuFactory(this)

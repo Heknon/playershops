@@ -1,8 +1,10 @@
 package me.oriharel.playershops.shops.shop
 
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.inventory.ShopInitializationInventory
 import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
+import me.oriharel.playershops.utilities.Utils.format
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -38,8 +40,18 @@ abstract class PlayerShop(
     abstract fun run(amount: Int, player: Player)
 
     fun onPlace(e: BlockPlaceEvent, playerShops: PlayerShops) {
+        buildHologram(playerShops)
         playerShops.shopManager.setPlayerShopBlockData(e.block, this)
         opeInitializationGUI(e.player)
+    }
+
+    fun buildHologram(playerShops: PlayerShops) {
+        val hologram = HologramsAPI.getHolograms(playerShops).find { it.location.block == block }
+                ?: HologramsAPI.createHologram(playerShops, block.location.add(0.0, 2.0, 0.0))
+        var index = 0
+        hologram.insertTextLine(index++, getType().toString() + "ING")
+        if (this is MoneyShop) hologram.insertTextLine(index++, "Price: ${price.format()}" + if (useZenCoins) " Zen Coins" else "$")
+        hologram.insertItemLine(index, item)
     }
 
     fun opeInitializationGUI(player: Player) {

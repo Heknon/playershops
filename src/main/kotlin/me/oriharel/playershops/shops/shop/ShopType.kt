@@ -6,7 +6,7 @@ enum class ShopType(val value: Int) {
     SHOWCASE(2);
 
     fun next(): ShopType {
-        return values[(this.ordinal + 1) % values.size];
+        return values[(this.ordinal + 1) % values.size]
     }
 
     companion object {
