@@ -61,6 +61,15 @@ object Utils {
         return this
     }
 
+    fun Player.giveItem(item: ItemStack): Player {
+        if (this.inventory.firstEmpty() == -1) {
+            this.location.world?.dropItemNaturally(this.location, item)
+        } else {
+            this.inventory.addItem(item)
+        }
+        return this
+    }
+
     fun getItemStackUnhandledNBT(itemStack: ItemStack): MutableMap<String?, NBTBase?> {
         val metaReference = getItemStackMetaReference(itemStack)
         return ReflectionUtils.Fields.getFieldValueOfUnknownClass(metaReference, "org.bukkit.craftbukkit.v1_15_R1.inventory.CraftMetaItem", "unhandledTags")!!
