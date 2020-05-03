@@ -23,11 +23,7 @@ internal class ShowcaseShop(
     }
 
     override fun run(amount: Int, player: Player) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPlace() {
-        TODO("Not yet implemented")
+        return
     }
 
 }

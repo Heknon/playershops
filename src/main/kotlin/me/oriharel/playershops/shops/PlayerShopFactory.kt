@@ -28,8 +28,8 @@ class PlayerShopFactory(private val economy: Economy) {
         else null
 
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, price!!, item, block, owner, mutableListOf(), settings)
-            ShopType.SELL -> SellShop(bank, price!!, item, block, owner, mutableListOf(), settings)
+            ShopType.BUY -> BuyShop(bank, economy, price!!, item, block, owner, mutableListOf(), settings)
+            ShopType.SELL -> SellShop(bank, economy, price!!, item, block, owner, mutableListOf(), settings)
             ShopType.SHOWCASE -> ShowcaseShop(item, block, owner, mutableListOf(), settings)
         } as T
     }
@@ -46,8 +46,8 @@ class PlayerShopFactory(private val economy: Economy) {
             settings: MutableList<ShopSetting>
     ): T {
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, price!!, itemStack, block, owner, allowedMutators, settings)
-            ShopType.SELL -> SellShop(bank, price!!, itemStack, block, owner, allowedMutators, settings)
+            ShopType.BUY -> BuyShop(bank, economy, price!!, itemStack, block, owner, allowedMutators, settings)
+            ShopType.SELL -> SellShop(bank, economy, price!!, itemStack, block, owner, allowedMutators, settings)
             ShopType.SHOWCASE -> ShowcaseShop(itemStack, block, owner, allowedMutators, settings)
         } as T
     }
@@ -62,8 +62,8 @@ class PlayerShopFactory(private val economy: Economy) {
         val bankToUse: ShopBank? = if (shop is MoneyShop && bank == null) shop.bank else bank
 
         return when (toType) {
-            ShopType.BUY -> BuyShop(bankToUse, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SELL -> SellShop(bankToUse, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.BUY -> BuyShop(bankToUse, economy, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.SELL -> SellShop(bankToUse, economy, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
             ShopType.SHOWCASE -> ShowcaseShop(shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
         } as T
     }

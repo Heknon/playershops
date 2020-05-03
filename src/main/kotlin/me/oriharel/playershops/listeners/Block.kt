@@ -19,6 +19,6 @@ class Block(private val playerShopManager: PlayerShopManager) : Listener {
         val compound: NBTTagCompound = e.itemInHand.getNBTClone()
         if (!compound.hasKey("playerShop")) return
         val shopItem: ShopItem = playerShopManager.getShopItem(e.itemInHand)!!
-        shopItem.shop.onPlace(e)
+        shopItem.shop.onPlace(e, playerShopManager.playerShops)
     }
 }

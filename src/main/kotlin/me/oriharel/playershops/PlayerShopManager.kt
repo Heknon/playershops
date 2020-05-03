@@ -14,7 +14,7 @@ import org.bukkit.persistence.PersistentDataType
 import java.util.*
 import kotlin.collections.HashMap
 
-class PlayerShopManager(private val playerShops: PlayerShops) {
+class PlayerShopManager(internal val playerShops: PlayerShops) {
     val shopCache: MutableMap<UUID, MutableMap<Long, PlayerShop>> = HashMap()
     val shopFactory: PlayerShopFactory = PlayerShopFactory(playerShops.economy)
     private val playerShopNamespacedKey: NamespacedKey = NamespacedKey(playerShops, "playerShop")
