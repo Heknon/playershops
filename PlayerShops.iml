@@ -44,6 +44,8 @@
     <orderEntry type="library" name="HolographicDisplays" level="project" />
     <orderEntry type="library" name="SuperMobCoins" level="project" />
     <orderEntry type="library" name="spigot-1.15.2" level="project" />
+    <orderEntry type="library" name="SmartInvs-1.2.7" level="project" />
+    <orderEntry type="library" name="ProtocolLib" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:21.0" level="project" />
@@ -66,7 +68,5 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-params:5.7.0-M1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.7.0-M1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.7.0-M1" level="project" />
-    <orderEntry type="library" name="SmartInvs-1.2.7" level="project" />
-    <orderEntry type="library" name="ProtocolLib" level="project" />
   </component>
 </module>

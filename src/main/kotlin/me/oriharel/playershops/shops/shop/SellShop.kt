@@ -9,6 +9,7 @@ import java.util.*
 
 internal class SellShop(
         bank: ShopBank?,
+        price: Long,
         item: ItemStack,
         block: Block,
         owner: UUID,
@@ -16,6 +17,7 @@ internal class SellShop(
         settings: MutableList<ShopSetting>
 ) : MoneyShop(
         bank,
+        price,
         item,
         block,
         owner,
@@ -23,11 +25,7 @@ internal class SellShop(
         settings
 ) {
 
-    override fun openSettings() {
-
-    }
-
-    override fun openPlayerGUI() {
+    override fun openPlayerGUI(player: Player) {
     }
 
     override fun run(amount: Int, player: Player) {
@@ -36,9 +34,5 @@ internal class SellShop(
         } else {
 
         }
-    }
-
-    override fun onPlace() {
-
     }
 }

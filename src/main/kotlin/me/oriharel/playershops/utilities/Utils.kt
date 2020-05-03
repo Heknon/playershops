@@ -11,16 +11,17 @@ import me.oriharel.playershops.shops.shop.PlayerShop
 import net.milkbowl.vault.economy.Economy
 import net.minecraft.server.v1_15_R1.NBTBase
 import net.minecraft.server.v1_15_R1.NBTTagCompound
-import org.bukkit.Bukkit
-import org.bukkit.ChatColor
-import org.bukkit.Location
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import java.text.DecimalFormat
 import java.util.*
 
 object Utils {
+
+    val decimalFormat: DecimalFormat = DecimalFormat("#,###")
 
     private fun longToLocation(packed: Long): Location {
         val x = (packed shl 37 shr 37).toInt()
@@ -47,8 +48,17 @@ object Utils {
         return Bukkit.getWorld(this)
     }
 
+    fun UUID.toOfflinePlayer(): OfflinePlayer {
+        return Bukkit.getOfflinePlayer(this)
+    }
+
     fun Pair<Long, Long>.toUUID(): UUID {
         return UUID(this.first, this.second)
+    }
+
+    fun OfflinePlayer.ifOnline(ifOnline: (Player) -> Unit): OfflinePlayer {
+        if (this.isOnline) ifOnline(this.player!!)
+        return this
     }
 
     fun getItemStackUnhandledNBT(itemStack: ItemStack): MutableMap<String?, NBTBase?> {
@@ -89,6 +99,10 @@ object Utils {
         }
 
         return stringBuilder.toString()
+    }
+
+    fun Number.format(): String {
+        return decimalFormat.format(this)
     }
 
     fun <E : Enum<E>> Enum<E>.toTitleCase(): String? {

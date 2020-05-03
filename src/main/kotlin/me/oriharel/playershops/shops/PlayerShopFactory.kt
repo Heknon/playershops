@@ -17,7 +17,8 @@ class PlayerShopFactory(private val economy: Economy) {
             block: Block,
             owner: UUID,
             settings: MutableList<ShopSetting>,
-            bankInitialFunds: Long = 0
+            bankInitialFunds: Long = 0,
+            price: Long? = null
     ): T {
         val bank: ShopBank? = if (settings.contains(ShopSetting.USE_INTERNAL_BANK))
             if (settings.contains(ShopSetting.USE_MOB_COINS))
@@ -27,8 +28,8 @@ class PlayerShopFactory(private val economy: Economy) {
         else null
 
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, item, block, owner, mutableListOf(), settings)
-            ShopType.SELL -> SellShop(bank, item, block, owner, mutableListOf(), settings)
+            ShopType.BUY -> BuyShop(bank, price!!, item, block, owner, mutableListOf(), settings)
+            ShopType.SELL -> SellShop(bank, price!!, item, block, owner, mutableListOf(), settings)
             ShopType.SHOWCASE -> ShowcaseShop(item, block, owner, mutableListOf(), settings)
         } as T
     }
@@ -37,6 +38,7 @@ class PlayerShopFactory(private val economy: Economy) {
     fun <T : PlayerShop> createShop(
             shopType: ShopType,
             bank: ShopBank? = null,
+            price: Long?,
             itemStack: ItemStack,
             block: Block,
             owner: UUID,
@@ -44,8 +46,8 @@ class PlayerShopFactory(private val economy: Economy) {
             settings: MutableList<ShopSetting>
     ): T {
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, itemStack, block, owner, allowedMutators, settings)
-            ShopType.SELL -> SellShop(bank, itemStack, block, owner, allowedMutators, settings)
+            ShopType.BUY -> BuyShop(bank, price!!, itemStack, block, owner, allowedMutators, settings)
+            ShopType.SELL -> SellShop(bank, price!!, itemStack, block, owner, allowedMutators, settings)
             ShopType.SHOWCASE -> ShowcaseShop(itemStack, block, owner, allowedMutators, settings)
         } as T
     }
@@ -54,13 +56,14 @@ class PlayerShopFactory(private val economy: Economy) {
     fun <T : PlayerShop> convertShop(
             shop: T,
             toType: ShopType,
-            bank: ShopBank? = null
+            bank: ShopBank? = null,
+            price: Long? = null
     ): T {
         val bankToUse: ShopBank? = if (shop is MoneyShop && bank == null) shop.bank else bank
 
         return when (toType) {
-            ShopType.BUY -> BuyShop(bankToUse, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SELL -> SellShop(bankToUse, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.BUY -> BuyShop(bankToUse, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.SELL -> SellShop(bankToUse, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
             ShopType.SHOWCASE -> ShowcaseShop(shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
         } as T
     }

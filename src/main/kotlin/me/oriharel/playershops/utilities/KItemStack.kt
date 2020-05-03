@@ -7,7 +7,17 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
-class KItemStack @JvmOverloads constructor(material: Material, amount: Int = 1, displayName: String? = null, lore: List<String>? = null, metadataModifier: ((ItemMeta) -> Unit)? = null, nbtModifier: ((Map<String?, NBTBase?>) -> Unit)? = null) : ItemStack(material, amount) {
+class KItemStack @JvmOverloads constructor(
+        material: Material,
+        amount: Int = 1,
+        displayName: String? = null,
+        lore: List<String>? = null,
+        metadataModifier: ((ItemMeta) -> Unit)? = null,
+        nbtModifier: ((Map<String?, NBTBase?>) -> Unit)? = null
+) : ItemStack(
+        material,
+        amount
+) {
 
     init {
         this.modifyMeta {

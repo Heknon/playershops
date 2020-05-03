@@ -22,6 +22,7 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
 
         val shopType: ShopType = if (shop is BuyShop) ShopType.BUY else if (shop is SellShop) ShopType.SELL else ShopType.SHOWCASE
         val bank: ShopBank? = if (shop is MoneyShop) shop.bank else null
+        val price: Long? = if (shop is MoneyShop) shop.price else null
 
         obj.add("blockXYZ", JsonPrimitive(shop.block.location.toLong()))
         obj.add("type", JsonPrimitive(shopType.name))
@@ -32,6 +33,7 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
         obj.add("owner", ctx.serialize(shop.owner, UUID::class.java))
         obj.add("bank", ctx.serialize(bank, ShopBank::class.java))
         obj.add("item", ctx.serialize(shop.item.serialize()))
+        obj.add("price", JsonPrimitive(price))
 
         return obj
     }
@@ -46,7 +48,8 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
                 settings = ctx.deserialize(obj.get("settings"), object : TypeToken<MutableList<UUID>>() {}.type),
                 owner = ctx.deserialize(obj.get("owner"), UUID::class.java),
                 bank = ctx.deserialize(obj.get("bank"), ShopBank::class.java),
-                itemStack = ItemStack.deserialize(ctx.deserialize(obj.get("item"), Map::class.java))
+                itemStack = ItemStack.deserialize(ctx.deserialize(obj.get("item"), Map::class.java)),
+                price = obj.get("price").asLong
         )
     }
 

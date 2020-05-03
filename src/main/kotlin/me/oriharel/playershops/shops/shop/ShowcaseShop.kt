@@ -1,5 +1,6 @@
 package me.oriharel.playershops.shops.shop
 
+import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -18,12 +19,8 @@ internal class ShowcaseShop(
         allowedMutators,
         settings
 ) {
-    override fun openSettings() {
-        TODO("Not yet implemented")
-    }
-
-    override fun openPlayerGUI() {
-        TODO("Not yet implemented")
+    override fun openPlayerGUI(player: Player) {
+        return
     }
 
     override fun run(amount: Int, player: Player) {
@@ -31,10 +28,6 @@ internal class ShowcaseShop(
     }
 
     override fun onPlace() {
-        TODO("Not yet implemented")
-    }
-
-    override fun opeInitializationGUI(player: Player) {
         TODO("Not yet implemented")
     }
 
