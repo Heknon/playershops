@@ -7,8 +7,8 @@ import me.oriharel.playershops.utilities.Utils
 import me.oriharel.playershops.utilities.Utils.toLong
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.block.BlockState
 import org.bukkit.block.TileState
-import org.bukkit.block.data.BlockData
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import java.util.*
@@ -35,7 +35,7 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
 
     fun getPlayerShopFromBlock(block: Block?): PlayerShop? {
         if (block == null) return null
-        if (block.blockData !is TileState) return null
+        if (block.state !is TileState) return null
         if (shopCache.containsKey(block.world.uid)) {
             val worldCache: MutableMap<Long, PlayerShop> = shopCache[block.world.uid]!!
             val loc: Long = block.location.toLong()
@@ -50,24 +50,24 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
             if (shop == null) playerShops.logger.fine("PlayerShop not found at block $block")
             return shop
         }
-        val shop: PlayerShop? = getPlayerShopFromBlock(block)
+        val shop: PlayerShop? = getPlayerShopFromBlockState(block)
 
         if (shop != null) shopCache[block.world.uid] = mutableMapOf(Pair(block.location.toLong(), shop))
         if (shop == null) playerShops.logger.fine("PlayerShop not found at block $block")
         return shop
     }
 
-    private fun getPlayerShopFromBlockData(block: Block): PlayerShop? {
-        val blockData: BlockData = block.blockData
-        if (blockData !is TileState) return null
-        return blockData.persistentDataContainer.get(playerShopNamespacedKey, playerShopPersistentDataType)
+    private fun getPlayerShopFromBlockState(block: Block): PlayerShop? {
+        val blockState: BlockState = block.state
+        if (blockState !is TileState) return null
+        return blockState.persistentDataContainer.get(playerShopNamespacedKey, playerShopPersistentDataType)
     }
 
-    fun setPlayerShopBlockData(block: Block, shop: PlayerShop): Boolean {
-        val blockData: BlockData = block.blockData
-        if (blockData !is TileState) return false
+    fun setPlayerShopBlockState(block: Block, shop: PlayerShop): Boolean {
+        val blockState: BlockState = block.state
+        if (blockState !is TileState) return false
 
-        blockData.persistentDataContainer.set(playerShopNamespacedKey, playerShopPersistentDataType, shop)
+        blockState.persistentDataContainer.set(playerShopNamespacedKey, playerShopPersistentDataType, shop)
         if (!shopCache.containsKey(block.world.uid)) shopCache[block.world.uid] = mutableMapOf()
         shopCache[block.world.uid]!![block.location.toLong()] = shop
         return true

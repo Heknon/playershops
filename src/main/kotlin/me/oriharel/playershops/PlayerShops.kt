@@ -1,8 +1,10 @@
 package me.oriharel.playershops
 
-import co.aikar.commands.BukkitCommandCompletionContext
 import co.aikar.commands.BukkitCommandManager
 import fr.minuskube.inv.InventoryManager
+import fr.minuskube.inv.SmartInventory
+import me.oriharel.playershops.listeners.Block
+import me.oriharel.playershops.listeners.Interact
 import me.oriharel.playershops.shops.shop.ShopType
 import me.oriharel.playershops.utilities.SignMenuFactory
 import net.milkbowl.vault.economy.Economy
@@ -11,7 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
-import java.util.stream.Collectors
+import java.nio.file.Files
 
 
 class PlayerShops : JavaPlugin() {
@@ -34,10 +36,21 @@ class PlayerShops : JavaPlugin() {
             return
         }
 
+        val file = dataFolder.toPath().resolve("config.yml")
+        if (!Files.exists(file)) {
+            saveDefaultConfig()
+        }
+
+
         signMenuFactory = SignMenuFactory(this)
         shopManager = PlayerShopManager(this)
         inventoryManager = InventoryManager(this)
         inventoryManager.init()
+        setupCommandManager()
+
+        Bukkit.getPluginManager().registerEvents(Interact(shopManager), this)
+        Bukkit.getPluginManager().registerEvents(Block(shopManager), this)
+
 
     }
 

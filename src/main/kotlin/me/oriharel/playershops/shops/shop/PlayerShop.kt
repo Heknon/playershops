@@ -15,8 +15,8 @@ import java.util.*
 
 abstract class PlayerShop(
         var item: ItemStack?,
-        val block: Block?,
-        val owner: UUID?,
+        var block: Block?,
+        var owner: UUID?,
         val allowedMutators: MutableSet<UUID>?,
         val settings: MutableSet<ShopSetting>?
 ) {
@@ -27,7 +27,7 @@ abstract class PlayerShop(
     protected open fun openSettings(player: Player) {
         player.sendMessage("§c§l[!] §eOpening the settings GUI of your shop")
         ShopSettingsInventory.INVENTORY.open(player)
-        ShopSettingsInventory.INVENTORY.manager.getContents(player).get().setProperty("shop", this)
+        ShopSettingsInventory.INVENTORY.manager.getContents(player).get().setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, this)
     }
 
     /**
@@ -41,7 +41,9 @@ abstract class PlayerShop(
     abstract fun run(amount: Int, player: Player)
 
     fun onPlace(e: BlockPlaceEvent, playerShops: PlayerShops) {
-        playerShops.shopManager.setPlayerShopBlockData(e.block, this)
+        owner = e.player.uniqueId
+        block = e.block
+        playerShops.shopManager.setPlayerShopBlockState(e.block, this)
         opeInitializationGUI(e.player)
     }
 

@@ -85,17 +85,17 @@ object InventoryConstants {
         }
 
 
-        fun setShop(contents: InventoryContents, shop: PlayerShop): ConstantUtilities {
+        fun setShop(contents: InventoryContents, shop: PlayerShop?): ConstantUtilities {
             contents.setProperty(PASSED_DOWN_SHOP_CONTENT_ID, shop)
             return this
         }
 
-        fun setUseMobCoins(contents: InventoryContents, useMobCoins: Boolean): ConstantUtilities {
+        fun setUseMobCoins(contents: InventoryContents, useMobCoins: Boolean?): ConstantUtilities {
             contents.setProperty(USE_MOB_COINS_CONTENT_ID, useMobCoins)
             return this
         }
 
-        fun setUseBank(contents: InventoryContents, useBank: Boolean): ConstantUtilities {
+        fun setUseBank(contents: InventoryContents, useBank: Boolean?): ConstantUtilities {
             contents.setProperty(USE_BANK_CONTENT_ID, useBank)
             return this
         }
@@ -105,17 +105,17 @@ object InventoryConstants {
             return this
         }
 
-        fun setPrice(contents: InventoryContents, price: Long): ConstantUtilities {
+        fun setPrice(contents: InventoryContents, price: Long?): ConstantUtilities {
             contents.setProperty(PRICE_CONTENT_ID, price)
             return this
         }
 
-        fun setSelectedShopType(contents: InventoryContents, selectedShopType: ShopType): ConstantUtilities {
+        fun setSelectedShopType(contents: InventoryContents, selectedShopType: ShopType?): ConstantUtilities {
             contents.setProperty(SHOP_TYPE_CONTENT_ID, selectedShopType)
             return this
         }
 
-        fun setShopifiedItem(contents: InventoryContents, shopifiedItem: ItemStack): ConstantUtilities {
+        fun setShopifiedItem(contents: InventoryContents, shopifiedItem: ItemStack?): ConstantUtilities {
             contents.setProperty(SHOPIFIED_ITEM_CONTENT_ID, shopifiedItem)
             return this
         }

@@ -46,12 +46,13 @@ class ShopItem : ItemStack {
             val configLoad: YamlConfiguration = playerShops.getConfig("config.yml")!!
 
             val lore: List<String> = configLoad.getStringList("shop_default_lore").map { ChatColor.translateAlternateColorCodes('&', it) }
-            val material: Material? = Material.getMaterial(configLoad.getString("shop_default_material") ?: "")
+            val material: Material = Material.getMaterial(configLoad.getString("shop_default_material") ?: "")
+                    ?: throw RuntimeException("Invalid default shop material! You must have a valid material in config.yml")
             val displayName: String? = configLoad.getString("shop_default_display_name")
-            val item: ItemStack = ItemStack(material!!, 1)
-            item.modifyMeta {
+            val item = ItemStack(material, 1)
+            if (lore.isNotEmpty() || displayName != null) item.modifyMeta {
                 it.lore = lore
-                it.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName!!))
+                if (displayName != null) it.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName))
             }
             return item
         }

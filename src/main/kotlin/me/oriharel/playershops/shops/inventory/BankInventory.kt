@@ -8,7 +8,6 @@ import fr.minuskube.inv.content.InventoryProvider
 import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.shop.Depositable
 import me.oriharel.playershops.shops.shop.MoneyShop
-import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
@@ -23,8 +22,10 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
     override fun init(player: Player, contents: InventoryContents) {
         val shop = InventoryConstants.ConstantUtilities.getShop(contents) as MoneyShop
         val bank = shop.bank!!
-        val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents) ?: shop.settings?.contains(ShopSetting.USE_MOB_COINS)!!
-        val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents) ?: shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!
+        val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents)
+                ?: shop.settings?.contains(ShopSetting.USE_MOB_COINS)!!
+        val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents)
+                ?: shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!
         InventoryConstants.ConstantUtilities.setUseBank(contents, useBank)
 
         contents.set(0, 8, ClickableItem.of(
@@ -67,7 +68,7 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                             else -> {
                                 bank.giveToAndWithdraw(amount, player.uniqueId)
                                 player.sendMessage("§b§l[INFO] §eYou've withdrawn ${amount.format()} from your shop's bank")
-                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
+                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(shop.block!!, shop)
                                 init(player, contents)
                                 return@createSignInput true
                             }
@@ -123,7 +124,7 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                             else -> {
                                 bank.takeFromAndDeposit(amount, player.uniqueId)
                                 player.sendMessage("§b§l[INFO] §eYou've deposited ${amount.format()} into your shop's bank")
-                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
+                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(shop.block!!, shop)
                                 init(player, contents)
                                 return@createSignInput true
                             }
@@ -155,8 +156,9 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                         shop.settings?.remove(ShopSetting.USE_INTERNAL_BANK)
                     }
 
-                    PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
+                    PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(shop.block!!, shop)
                 })
+                .manager(PlayerShops.INSTANCE.inventoryManager)
                 .build()
     }
 }

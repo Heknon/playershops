@@ -13,6 +13,7 @@ class Interact(private val shopManager: PlayerShopManager) : Listener {
         if (e.action != Action.RIGHT_CLICK_BLOCK) return
 
         val shop: PlayerShop = shopManager.getPlayerShopFromBlock(e.clickedBlock) ?: return
+        e.isCancelled = true
         shop.open(e.player.uniqueId)
     }
 }

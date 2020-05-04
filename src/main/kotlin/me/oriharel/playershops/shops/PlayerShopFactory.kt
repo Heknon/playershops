@@ -28,8 +28,8 @@ class PlayerShopFactory(private val economy: Economy) {
         else null
 
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, economy, price!!, item, block, owner, mutableSetOf(), settings)
-            ShopType.SELL -> SellShop(bank, economy, price!!, item, block, owner, mutableSetOf(), settings)
+            ShopType.BUY -> BuyShop(bank, economy, price, item, block, owner, mutableSetOf(), settings)
+            ShopType.SELL -> SellShop(bank, economy, price, item, block, owner, mutableSetOf(), settings)
             ShopType.SHOWCASE -> ShowcaseShop(item, block, owner, mutableSetOf(), settings)
         } as T
     }
@@ -39,8 +39,8 @@ class PlayerShopFactory(private val economy: Economy) {
             shopType: ShopType,
             bank: ShopBank? = null,
             price: Long?,
-            itemStack: ItemStack,
-            block: Block,
+            itemStack: ItemStack?,
+            block: Block?,
             owner: UUID,
             allowedMutators: MutableSet<UUID>,
             settings: MutableSet<ShopSetting>

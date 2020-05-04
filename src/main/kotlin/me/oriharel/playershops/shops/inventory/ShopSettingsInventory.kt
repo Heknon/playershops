@@ -86,6 +86,7 @@ class ShopSettingsInventory : InventoryProvider {
                 .title(InventoryConstants.SettingsInventory.TITLE)
                 .closeable(InventoryConstants.SettingsInventory.CLOSEABLE)
                 .listener(InventoryListener(InventoryCloseEvent::class.java) {
+                    print("closed")
                     val contents = PlayerShops.INSTANCE.inventoryManager.getContents(it.player as Player)!!.get()
                     val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
                     val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents)!!
@@ -96,6 +97,7 @@ class ShopSettingsInventory : InventoryProvider {
                         shop.settings?.remove(ShopSetting.USE_MOB_COINS)
 
                 })
+                .manager(PlayerShops.INSTANCE.inventoryManager)
                 .build()
     }
 }

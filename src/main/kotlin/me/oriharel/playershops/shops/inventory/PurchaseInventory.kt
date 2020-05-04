@@ -36,7 +36,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                                 lore = listOf("&2${shop.getType().name}: &6${shop.price?.format()}")
                         )) {
                     playerShops.createSignInput(player, "&6Amount: &9", "&6&l${shop.getType()}") { _, strings ->
-                        val amount: Int? = strings[0].replace("\\D", "").toIntOrNull()
+                        val amount: Int? = strings[0].replace("\\D".toRegex(), "").toIntOrNull()
                         // TESTME: Check if exiting the GUI exits the inventory as well
                         handleAmountToPurchaseInput(contents, player, amount)
                     }
@@ -122,6 +122,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                 .size(InventoryConstants.PurchaseInventory.ROWS, InventoryConstants.PurchaseInventory.COLUMNS)
                 .closeable(InventoryConstants.PurchaseInventory.CLOSEABLE)
                 .provider(PurchaseInventory(PlayerShops.INSTANCE))
+                .manager(PlayerShops.INSTANCE.inventoryManager)
                 .build()
     }
 

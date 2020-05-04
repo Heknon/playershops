@@ -4,6 +4,7 @@ import fr.minuskube.inv.ClickableItem
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import fr.minuskube.inv.content.InventoryProvider
+import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.utilities.KItemStack
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -41,6 +42,8 @@ class ConfirmationInventory(private val deny: ItemStack, private val confirm: It
                 .provider(ConfirmationInventory(
                         deny = KItemStack(Material.RED_STAINED_GLASS_PANE, displayName = "&c&lDENY"),
                         confirm = KItemStack(Material.LIME_STAINED_GLASS, displayName = "&a&lCONFIRM")
-                )).build()
+                ))
+                .manager(PlayerShops.INSTANCE.inventoryManager)
+                .build()
     }
 }
