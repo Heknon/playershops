@@ -11,12 +11,12 @@ import java.util.*
 abstract class MoneyShop(
         val bank: ShopBank?,
         val economy: Economy,
-        var price: Long,
-        item: ItemStack,
-        block: Block,
-        owner: UUID,
-        allowedMutators: MutableList<UUID>,
-        settings: MutableList<ShopSetting>
+        var price: Long?,
+        item: ItemStack?,
+        block: Block?,
+        owner: UUID?,
+        allowedMutators: MutableSet<UUID>?,
+        settings: MutableSet<ShopSetting>?
 ) : PlayerShop(
         item,
         block,
@@ -24,8 +24,8 @@ abstract class MoneyShop(
         allowedMutators,
         settings
 ) {
-    protected val useInternalBank: Boolean = settings.contains(ShopSetting.USE_INTERNAL_BANK)
-    val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS)
+    protected val useInternalBank: Boolean = settings?.contains(ShopSetting.USE_INTERNAL_BANK) ?: false
+    val useZenCoins: Boolean = settings?.contains(ShopSetting.USE_MOB_COINS) ?: false
 
     override fun openPlayerGUI(player: Player) {
         PurchaseInventory.INVENTORY.open(player)

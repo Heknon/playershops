@@ -1,18 +1,25 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.ClickableItem
+import fr.minuskube.inv.InventoryListener
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import fr.minuskube.inv.content.InventoryProvider
-import me.oriharel.playershops.shops.shop.PlayerShop
+import me.oriharel.playershops.PlayerShops
+import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryCloseEvent
 
 class ShopSettingsInventory : InventoryProvider {
 
     override fun init(player: Player, contents: InventoryContents) {
+
+        val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
+
+        InventoryConstants.ConstantUtilities.setUseBank(contents, shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!)
+        InventoryConstants.ConstantUtilities.setUseMobCoins(contents, shop.settings.contains(ShopSetting.USE_MOB_COINS))
 
         contents.set(0, 4,
                 ClickableItem.of(
@@ -22,7 +29,7 @@ class ShopSettingsInventory : InventoryProvider {
                         )
                 ) {
                     // Reinitialize a shop
-                    getShop(contents).opeInitializationGUI(player)
+                    shop.opeInitializationGUI(player)
                 })
 
         buildMobCoinsItem(contents, player)
@@ -39,12 +46,12 @@ class ShopSettingsInventory : InventoryProvider {
                 ClickableItem.of(
                         KItemStack(
                                 material = Material.MAGMA_CREAM,
-                                displayName = "&6" + if (getUseMobCoins(contents)) "USING ZENCOINS" else "USING MONEY"
+                                displayName = "&6" + if (InventoryConstants.ConstantUtilities.getUseMobCoins(contents)!!) "USING ZENCOINS" else "USING MONEY"
                         )
                 ) {
                     // Logic on whether to use zen coins or not
-                    val useMobCoinsCurr = !getUseMobCoins(contents)
-                    setUseMobCoins(contents, useMobCoinsCurr)
+                    val useMobCoinsCurr = !InventoryConstants.ConstantUtilities.getUseMobCoins(contents)!!
+                    InventoryConstants.ConstantUtilities.setUseMobCoins(contents, useMobCoinsCurr)
                     buildMobCoinsItem(contents, player)
                     player.sendMessage("§b§l[INFO] §eYour shop is now using " + if (useMobCoinsCurr) "Zen Coins" else "Money" + " as it's primary currency")
                 })
@@ -55,7 +62,7 @@ class ShopSettingsInventory : InventoryProvider {
                 ClickableItem.of(
                         KItemStack(
                                 material = Material.PAPER,
-                                displayName = "&6" + if (getUseBank(contents)) "Bank" else "Click to enable the bank"
+                                displayName = "&6Bank"
                         )
                 ) {
                     onBankItemClick(contents, player)
@@ -64,39 +71,11 @@ class ShopSettingsInventory : InventoryProvider {
 
     private fun onBankItemClick(contents: InventoryContents, player: Player) {
         // Logic on whether to use bank and if enabled open bank gui
-        if (getUseBank(contents)) {
-            BankInventory.INVENTORY.open(player)
-            BankInventory.INVENTORY.manager.getContents(player).ifPresent {
-                it.setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, getShop(contents))
-                player.sendMessage("§b§l[INFO] §bOpened bank")
-            }
-        } else {
-            setUseBank(contents, true)
-            buildBankItem(contents, player)
-            player.sendMessage("§b§l[INFO] §bActivated bank")
+        BankInventory.INVENTORY.open(player)
+        BankInventory.INVENTORY.manager.getContents(player).ifPresent {
+            it.setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, InventoryConstants.ConstantUtilities.getShop(contents))
+            player.sendMessage("§b§l[INFO] §bOpened bank")
         }
-    }
-
-    private fun getShop(contents: InventoryContents): PlayerShop {
-        return contents.property(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID)
-    }
-
-    private fun getUseMobCoins(contents: InventoryContents): Boolean {
-        return contents.property(InventoryConstants.USE_MOB_COINS_CONTENT_ID)
-    }
-
-    private fun getUseBank(contents: InventoryContents): Boolean {
-        return contents.property(InventoryConstants.USE_BANK_CONTENT_ID)
-    }
-
-    private fun setUseBank(contents: InventoryContents, useBank: Boolean): ShopSettingsInventory {
-        contents.setProperty(InventoryConstants.USE_BANK_CONTENT_ID, useBank)
-        return this
-    }
-
-    private fun setUseMobCoins(contents: InventoryContents, mobCoins: Boolean): ShopSettingsInventory {
-        contents.setProperty(InventoryConstants.USE_MOB_COINS_CONTENT_ID, mobCoins)
-        return this
     }
 
     companion object {
@@ -106,6 +85,17 @@ class ShopSettingsInventory : InventoryProvider {
                 .size(InventoryConstants.SettingsInventory.ROWS, InventoryConstants.SettingsInventory.COLUMNS)
                 .title(InventoryConstants.SettingsInventory.TITLE)
                 .closeable(InventoryConstants.SettingsInventory.CLOSEABLE)
+                .listener(InventoryListener(InventoryCloseEvent::class.java) {
+                    val contents = PlayerShops.INSTANCE.inventoryManager.getContents(it.player as Player)!!.get()
+                    val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
+                    val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents)!!
+
+                    if (useMobCoins)
+                        shop.settings?.add(ShopSetting.USE_MOB_COINS)
+                    else
+                        shop.settings?.remove(ShopSetting.USE_MOB_COINS)
+
+                })
                 .build()
     }
 }

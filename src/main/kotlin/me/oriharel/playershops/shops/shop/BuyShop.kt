@@ -13,12 +13,12 @@ import java.util.*
 internal class BuyShop(
         bank: ShopBank?,
         economy: Economy,
-        price: Long,
-        item: ItemStack,
-        block: Block,
-        owner: UUID,
-        allowedMutators: MutableList<UUID>,
-        settings: MutableList<ShopSetting>
+        price: Long?,
+        item: ItemStack?,
+        block: Block?,
+        owner: UUID?,
+        allowedMutators: MutableSet<UUID>?,
+        settings: MutableSet<ShopSetting>?
 ) : MoneyShop(
         bank,
         economy,
@@ -36,12 +36,12 @@ internal class BuyShop(
         }
 
         if (useInternalBank) {
-            bank!!.giveToAndWithdraw(price * amount, player.uniqueId)
+            bank!!.giveToAndWithdraw(price!! * amount, player.uniqueId)
         } else {
             if (useZenCoins) {
                 val profileOwner = MobCoinsAPI.getProfileManager().getProfile(owner)
                 if (profileOwner.mobCoins - amount < 0) {
-                    owner.toOfflinePlayer().ifOnline { it.sendMessage("§c§l[!] §eInsufficient funds! You are missing ${kotlin.math.abs(profileOwner.mobCoins - amount)} zen coins! Players can no longer buy from your shop!") }
+                    owner?.toOfflinePlayer()?.ifOnline { it.sendMessage("§c§l[!] §eInsufficient funds! You are missing ${kotlin.math.abs(profileOwner.mobCoins - amount)} zen coins! Players can no longer buy from your shop!") }
                     player.sendMessage("§c§l[!] §eThe owner of this shop doesn't have enough money right now!")
                     return
                 }
@@ -49,19 +49,19 @@ internal class BuyShop(
                 profile.mobCoins = profile.mobCoins - amount
                 profileOwner.mobCoins = profileOwner.mobCoins + amount
             } else {
-                if (economy.getBalance(owner.toOfflinePlayer()) - amount.toDouble() < 0) {
-                    owner.toOfflinePlayer().ifOnline { it.sendMessage("§c§l[!] §eInsufficient funds! You are missing ${kotlin.math.abs(economy.getBalance(player) - amount)}! Players can no longer buy from your shop!") }
+                if (economy.getBalance(owner?.toOfflinePlayer()) - amount.toDouble() < 0) {
+                    owner?.toOfflinePlayer()?.ifOnline { it.sendMessage("§c§l[!] §eInsufficient funds! You are missing ${kotlin.math.abs(economy.getBalance(player) - amount)}! Players can no longer buy from your shop!") }
                     player.sendMessage("§c§l[!] §eThe owner of this shop doesn't have enough money right now!")
                     return
                 }
                 economy.depositPlayer(player, amount.toDouble())
-                economy.withdrawPlayer(owner.toOfflinePlayer(), amount.toDouble())
+                economy.withdrawPlayer(owner?.toOfflinePlayer(), amount.toDouble())
             }
         }
 
-        val clone = item.clone()
+        val clone = item!!.clone()
         clone.amount = amount
         player.inventory.remove(clone)
-        item.amount += amount
+        item!!.amount += amount
     }
 }

@@ -14,11 +14,11 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 
 abstract class PlayerShop(
-        var item: ItemStack,
-        val block: Block,
-        val owner: UUID,
-        val allowedMutators: MutableList<UUID>,
-        val settings: MutableList<ShopSetting>
+        var item: ItemStack?,
+        val block: Block?,
+        val owner: UUID?,
+        val allowedMutators: MutableSet<UUID>?,
+        val settings: MutableSet<ShopSetting>?
 ) {
 
     /**
@@ -41,17 +41,16 @@ abstract class PlayerShop(
     abstract fun run(amount: Int, player: Player)
 
     fun onPlace(e: BlockPlaceEvent, playerShops: PlayerShops) {
-        buildHologram(playerShops)
         playerShops.shopManager.setPlayerShopBlockData(e.block, this)
         opeInitializationGUI(e.player)
     }
 
     fun buildHologram(playerShops: PlayerShops) {
         val hologram = HologramsAPI.getHolograms(playerShops).find { it.location.block == block }
-                ?: HologramsAPI.createHologram(playerShops, block.location.add(0.0, 2.0, 0.0))
+                ?: HologramsAPI.createHologram(playerShops, block?.location?.add(0.0, 2.0, 0.0))
         var index = 0
         hologram.insertTextLine(index++, getType().toString() + "ING")
-        if (this is MoneyShop) hologram.insertTextLine(index++, "Price: ${price.format()}" + if (useZenCoins) " Zen Coins" else "$")
+        if (this is MoneyShop) hologram.insertTextLine(index++, "Price: ${price?.format()}" + if (useZenCoins) " Zen Coins" else "$")
         hologram.insertItemLine(index, item)
     }
 

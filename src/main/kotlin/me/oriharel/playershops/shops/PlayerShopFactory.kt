@@ -13,10 +13,10 @@ class PlayerShopFactory(private val economy: Economy) {
     @JvmOverloads
     fun <T : PlayerShop> createNewShop(
             shopType: ShopType,
-            item: ItemStack,
-            block: Block,
-            owner: UUID,
-            settings: MutableList<ShopSetting>,
+            item: ItemStack?,
+            block: Block?,
+            owner: UUID?,
+            settings: MutableSet<ShopSetting>,
             bankInitialFunds: Long = 0,
             price: Long? = null
     ): T {
@@ -28,9 +28,9 @@ class PlayerShopFactory(private val economy: Economy) {
         else null
 
         return when (shopType) {
-            ShopType.BUY -> BuyShop(bank, economy, price!!, item, block, owner, mutableListOf(), settings)
-            ShopType.SELL -> SellShop(bank, economy, price!!, item, block, owner, mutableListOf(), settings)
-            ShopType.SHOWCASE -> ShowcaseShop(item, block, owner, mutableListOf(), settings)
+            ShopType.BUY -> BuyShop(bank, economy, price!!, item, block, owner, mutableSetOf(), settings)
+            ShopType.SELL -> SellShop(bank, economy, price!!, item, block, owner, mutableSetOf(), settings)
+            ShopType.SHOWCASE -> ShowcaseShop(item, block, owner, mutableSetOf(), settings)
         } as T
     }
 
@@ -42,8 +42,8 @@ class PlayerShopFactory(private val economy: Economy) {
             itemStack: ItemStack,
             block: Block,
             owner: UUID,
-            allowedMutators: MutableList<UUID>,
-            settings: MutableList<ShopSetting>
+            allowedMutators: MutableSet<UUID>,
+            settings: MutableSet<ShopSetting>
     ): T {
         return when (shopType) {
             ShopType.BUY -> BuyShop(bank, economy, price!!, itemStack, block, owner, allowedMutators, settings)

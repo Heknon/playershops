@@ -6,11 +6,11 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 
 internal class ShowcaseShop(
-        item: ItemStack,
-        block: Block,
-        owner: UUID,
-        allowedMutators: MutableList<UUID>,
-        settings: MutableList<ShopSetting>
+        item: ItemStack?,
+        block: Block?,
+        owner: UUID?,
+        allowedMutators: MutableSet<UUID>?,
+        settings: MutableSet<ShopSetting>?
 ) : PlayerShop(
         item,
         block,

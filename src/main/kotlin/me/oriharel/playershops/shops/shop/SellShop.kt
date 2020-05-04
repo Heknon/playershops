@@ -15,12 +15,12 @@ import java.util.*
 internal class SellShop(
         bank: ShopBank?,
         economy: Economy,
-        price: Long,
-        item: ItemStack,
-        block: Block,
-        owner: UUID,
-        allowedMutators: MutableList<UUID>,
-        settings: MutableList<ShopSetting>
+        price: Long?,
+        item: ItemStack?,
+        block: Block?,
+        owner: UUID?,
+        allowedMutators: MutableSet<UUID>?,
+        settings: MutableSet<ShopSetting>?
 ) : MoneyShop(
         bank,
         economy,
@@ -34,13 +34,13 @@ internal class SellShop(
 
     override fun run(amount: Int, player: Player) {
 
-        if (item.amount - amount < 0) {
-            player.sendMessage("§c§l[!] §eThis shop does not have $amount ${item.type.toTitleCase()}")
+        if (item!!.amount - amount < 0) {
+            player.sendMessage("§c§l[!] §eThis shop does not have $amount ${item!!.type.toTitleCase()}")
             return
         }
 
         if (useInternalBank) {
-            bank!!.takeFromAndDeposit(price * amount, player.uniqueId)
+            bank!!.takeFromAndDeposit(price!! * amount, player.uniqueId)
         } else {
             if (useZenCoins) {
                 val profile = MobCoinsAPI.getProfileManager().getProfile(player)
@@ -57,11 +57,11 @@ internal class SellShop(
                     return
                 }
                 economy.withdrawPlayer(player, amount.toDouble())
-                economy.depositPlayer(owner.toOfflinePlayer(), amount.toDouble())
+                economy.depositPlayer(owner?.toOfflinePlayer(), amount.toDouble())
             }
-            val clone: ItemStack = item.clone()
+            val clone: ItemStack = item!!.clone()
 
-            item.amount = item.amount - amount
+            item!!.amount = item!!.amount - amount
             clone.amount = amount
             player.giveItem(clone)
         }

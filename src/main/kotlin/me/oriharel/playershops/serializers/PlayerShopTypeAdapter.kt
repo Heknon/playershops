@@ -20,7 +20,7 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
         val bank: ShopBank? = if (shop is MoneyShop) shop.bank else null
         val price: Long? = if (shop is MoneyShop) shop.price else null
 
-        obj.add("blockXYZ", JsonPrimitive(shop.block.location.toLong()))
+        obj.add("blockXYZ", JsonPrimitive(shop.block!!.location.toLong()))
         obj.add("type", JsonPrimitive(shopType.name))
 
         obj.add("allowedMutators", ctx.serialize(shop.allowedMutators, object : TypeToken<MutableList<UUID>>() {}.type))
@@ -28,7 +28,7 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
         obj.add("worldUUID", ctx.serialize(shop.block.world.uid, UUID::class.java))
         obj.add("owner", ctx.serialize(shop.owner, UUID::class.java))
         obj.add("bank", ctx.serialize(bank, ShopBank::class.java))
-        obj.add("item", ctx.serialize(shop.item.serialize()))
+        obj.add("item", ctx.serialize(shop.item!!.serialize()))
         obj.add("price", JsonPrimitive(price))
 
         return obj

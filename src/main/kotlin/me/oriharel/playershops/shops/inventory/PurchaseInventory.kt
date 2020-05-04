@@ -33,7 +33,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                         KItemStack(
                                 material = Material.LIME_STAINED_GLASS_PANE,
                                 displayName = "&a&l" + shop.getType().name,
-                                lore = listOf("&2${shop.getType().name}: &6${shop.price.format()}")
+                                lore = listOf("&2${shop.getType().name}: &6${shop.price?.format()}")
                         )) {
                     playerShops.createSignInput(player, "&6Amount: &9", "&6&l${shop.getType()}") { _, strings ->
                         val amount: Int? = strings[0].replace("\\D", "").toIntOrNull()
@@ -70,8 +70,8 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                 player.sendMessage("§c&l[!] &ePrice must be a non-negative number!")
                 return true
             }
-            amount > shop.item.amount -> {
-                player.sendMessage("§c&l[!] &eThe owner does not have that amount in stock! Amount if stock - ${shop.item.amount}")
+            amount > shop.item?.amount!! -> {
+                player.sendMessage("§c&l[!] &eThe owner does not have that amount in stock! Amount if stock - ${shop.item!!.amount}")
                 return true
             }
             else -> {
@@ -84,7 +84,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
     private fun openConfirmationInventory(contents: InventoryContents, player: Player, amount: Int) {
         val shop = getShop(contents)
         val shopType = shop.getType()
-        val owner = shop.owner.toOfflinePlayer()
+        val owner = shop.owner?.toOfflinePlayer()
         val inventory = ConfirmationInventory.INVENTORY
 
         inventory.open(player)
@@ -92,13 +92,13 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
             if (it == ConfirmationType.CONFIRM) {
                 INVENTORY.close(player)
                 if (shopType == ShopType.BUY) {
-                    owner.ifOnline {
-                        it.sendMessage("§b§l[INFO] §e${player.name} has just bought $amount of ${shop.item.type.toTitleCase()} from your shop!")
+                    owner?.ifOnline {
+                        it.sendMessage("§b§l[INFO] §e${player.name} has just bought $amount of ${shop.item!!.type.toTitleCase()} from your shop!")
                     }
-                    player.sendMessage("§b§l[INFO] §eYou have successfully sold $amount of ${shop.item.type.toTitleCase()}!")
+                    player.sendMessage("§b§l[INFO] §eYou have successfully sold $amount of ${shop.item!!.type.toTitleCase()}!")
                 } else if (shopType == ShopType.SELL) {
-                    owner.ifOnline {
-                        it.sendMessage("§b§l[INFO] §e${player.name} has just sold $amount of ${shop.item.type.toTitleCase()} to you!")
+                    owner?.ifOnline {
+                        it.sendMessage("§b§l[INFO] §e${player.name} has just sold $amount of ${shop.item!!.type.toTitleCase()} to you!")
                     }
                     player.sendMessage("§b§l[INFO] §eYou've successfully bought $amount!")
                 }

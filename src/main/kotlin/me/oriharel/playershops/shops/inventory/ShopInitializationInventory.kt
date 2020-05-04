@@ -96,7 +96,7 @@ class ShopInitializationInventory(private val playerShops: PlayerShops) : Invent
 
         shop.item = shopifiedItem
 
-        shopManager.setPlayerShopBlockData(shop.block, shop)
+        shopManager.setPlayerShopBlockData(shop.block!!, shop)
         player.sendMessage("§b§l[INFO] §eInitialized shop!")
         INVENTORY.close(player)
     }

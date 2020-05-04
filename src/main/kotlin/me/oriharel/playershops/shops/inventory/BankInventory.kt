@@ -1,6 +1,7 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.ClickableItem
+import fr.minuskube.inv.InventoryListener
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import fr.minuskube.inv.content.InventoryProvider
@@ -8,20 +9,33 @@ import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.shop.Depositable
 import me.oriharel.playershops.shops.shop.MoneyShop
 import me.oriharel.playershops.shops.shop.PlayerShop
+import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
 import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryCloseEvent
 import kotlin.math.abs
 
 class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
 
     override fun init(player: Player, contents: InventoryContents) {
-        // TODO: Withdraw, See amount of money in, deposit
-        val shop = getShop(contents) as MoneyShop
+        val shop = InventoryConstants.ConstantUtilities.getShop(contents) as MoneyShop
         val bank = shop.bank!!
-        val useMobCoins = getUseMobCoins(contents)
+        val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents) ?: shop.settings?.contains(ShopSetting.USE_MOB_COINS)!!
+        val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents) ?: shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!
+        InventoryConstants.ConstantUtilities.setUseBank(contents, useBank)
+
+        contents.set(0, 8, ClickableItem.of(
+                KItemStack(
+                        material = if (useBank) Material.LIME_STAINED_GLASS_PANE else Material.RED_STAINED_GLASS_PANE,
+                        displayName = if (useBank) "&6USING BANK" else "&6CLICK TO ENABLE BANK"
+                )
+        ) {
+            InventoryConstants.ConstantUtilities.setUseBank(contents, !useBank)
+            init(player, contents)
+        })
 
         contents.set(1, 2,
                 ClickableItem.of(
@@ -53,6 +67,7 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                             else -> {
                                 bank.giveToAndWithdraw(amount, player.uniqueId)
                                 player.sendMessage("§b§l[INFO] §eYou've withdrawn ${amount.format()} from your shop's bank")
+                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
                                 init(player, contents)
                                 return@createSignInput true
                             }
@@ -108,6 +123,7 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                             else -> {
                                 bank.takeFromAndDeposit(amount, player.uniqueId)
                                 player.sendMessage("§b§l[INFO] §eYou've deposited ${amount.format()} into your shop's bank")
+                                PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
                                 init(player, contents)
                                 return@createSignInput true
                             }
@@ -121,14 +137,6 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
 
     }
 
-    private fun getShop(contents: InventoryContents): PlayerShop {
-        return contents.property(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID)
-    }
-
-    private fun getUseMobCoins(contents: InventoryContents): Boolean {
-        return contents.property(InventoryConstants.USE_MOB_COINS_CONTENT_ID)
-    }
-
     companion object {
         val INVENTORY: SmartInventory = SmartInventory.builder()
                 .id(InventoryConstants.BankInventory.ID)
@@ -136,6 +144,19 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                 .size(InventoryConstants.BankInventory.ROWS, InventoryConstants.BankInventory.COLUMNS)
                 .closeable(InventoryConstants.BankInventory.CLOSEABLE)
                 .title(InventoryConstants.BankInventory.TITLE)
+                .listener(InventoryListener(InventoryCloseEvent::class.java) {
+                    val contents = PlayerShops.INSTANCE.inventoryManager.getContents(it.player as Player)!!.get()
+                    val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
+                    val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents)!!
+
+                    if (useBank) {
+                        shop.settings?.add(ShopSetting.USE_INTERNAL_BANK)
+                    } else {
+                        shop.settings?.remove(ShopSetting.USE_INTERNAL_BANK)
+                    }
+
+                    PlayerShops.INSTANCE.shopManager.setPlayerShopBlockData(shop.block!!, shop)
+                })
                 .build()
     }
 }
