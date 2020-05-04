@@ -28,7 +28,7 @@ internal class BuyShop(
         owner,
         allowedMutators,
         settings
-) {
+), Depositable {
 
     override fun run(amount: Int, player: Player) {
         if (!player.inventory.contains(item, amount)) {
@@ -36,7 +36,7 @@ internal class BuyShop(
         }
 
         if (useInternalBank) {
-            bank!!.giveToAndWithdraw(amount, player.uniqueId)
+            bank!!.giveToAndWithdraw(price * amount, player.uniqueId)
         } else {
             if (useZenCoins) {
                 val profileOwner = MobCoinsAPI.getProfileManager().getProfile(owner)

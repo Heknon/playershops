@@ -5,19 +5,19 @@ import me.swanis.mobcoins.profile.Profile
 import java.util.*
 
 internal class ZenCoinShopBank(balance: Long) : ShopBank(balance) {
-    override fun takeFromAndDeposit(amount: Int, takeFrom: UUID) {
+    override fun takeFromAndDeposit(amount: Long, takeFrom: UUID) {
         takeFromAndDeposit(amount) {
             val profile: Profile = getPlayerMobCoinProfile(takeFrom)
 
-            profile.mobCoins = profile.mobCoins - it
+            profile.mobCoins = profile.mobCoins - it.toInt()
         }
     }
 
-    override fun giveToAndWithdraw(amount: Int, giveTo: UUID) {
+    override fun giveToAndWithdraw(amount: Long, giveTo: UUID) {
         giveToAndWithdraw(amount) {
             val profile: Profile = getPlayerMobCoinProfile(giveTo)
 
-            profile.mobCoins = profile.mobCoins + it
+            profile.mobCoins = profile.mobCoins + it.toInt()
         }
     }
 

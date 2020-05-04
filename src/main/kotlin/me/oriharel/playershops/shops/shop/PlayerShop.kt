@@ -2,6 +2,7 @@ package me.oriharel.playershops.shops.shop
 
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import me.oriharel.playershops.PlayerShops
+import me.oriharel.playershops.shops.inventory.InventoryConstants
 import me.oriharel.playershops.shops.inventory.ShopInitializationInventory
 import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
 import me.oriharel.playershops.utilities.Utils.format
@@ -58,7 +59,7 @@ abstract class PlayerShop(
         ShopInitializationInventory.INVENTORY.open(player)
         ShopInitializationInventory.INVENTORY.manager.getContents(player)
                 .get()
-                .setProperty(ShopInitializationInventory.PASSED_DOWN_SHOP_CONTENT_ID, this)
+                .setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, this)
         player.sendMessage("§b§l[INFO] §bInitializing shop")
     }
 

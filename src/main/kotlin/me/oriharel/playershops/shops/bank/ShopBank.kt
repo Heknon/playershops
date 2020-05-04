@@ -4,24 +4,24 @@ import java.util.*
 
 abstract class ShopBank(var balance: Long) {
 
-    abstract fun takeFromAndDeposit(amount: Int, takeFrom: UUID)
-    abstract fun giveToAndWithdraw(amount: Int, giveTo: UUID)
+    abstract fun takeFromAndDeposit(amount: Long, takeFrom: UUID)
+    abstract fun giveToAndWithdraw(amount: Long, giveTo: UUID)
 
-    protected fun takeFromAndDeposit(amount: Int, takeFrom: (amount: Int) -> Unit) {
+    protected fun takeFromAndDeposit(amount: Long, takeFrom: (amount: Long) -> Unit) {
         deposit(amount)
         takeFrom(amount)
     }
 
-    protected fun giveToAndWithdraw(amount: Int, giveTo: (amount: Int) -> Unit) {
+    protected fun giveToAndWithdraw(amount: Long, giveTo: (amount: Long) -> Unit) {
         withdraw(amount)
         giveTo(amount)
     }
 
-    private fun deposit(amount: Int) {
+    private fun deposit(amount: Long) {
         balance += amount
     }
 
-    private fun withdraw(amount: Int) {
+    private fun withdraw(amount: Long) {
         balance -= amount
     }
 }

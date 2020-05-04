@@ -40,7 +40,7 @@ internal class SellShop(
         }
 
         if (useInternalBank) {
-            bank!!.takeFromAndDeposit(amount, player.uniqueId)
+            bank!!.takeFromAndDeposit(price * amount, player.uniqueId)
         } else {
             if (useZenCoins) {
                 val profile = MobCoinsAPI.getProfileManager().getProfile(player)

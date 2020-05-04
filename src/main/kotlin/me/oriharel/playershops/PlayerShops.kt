@@ -19,7 +19,7 @@ class PlayerShops : JavaPlugin() {
     private val configCache: MutableMap<String, YamlConfiguration> = HashMap()
 
     override fun onLoad() {
-        instance = this
+        INSTANCE = this
     }
 
     override fun onEnable() {
@@ -76,6 +76,6 @@ class PlayerShops : JavaPlugin() {
     }
 
     companion object {
-        lateinit var instance: PlayerShops
+        lateinit var INSTANCE: PlayerShops
     }
 }

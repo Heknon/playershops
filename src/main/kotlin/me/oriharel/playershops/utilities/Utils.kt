@@ -21,7 +21,7 @@ import java.util.*
 
 object Utils {
 
-    val decimalFormat: DecimalFormat = DecimalFormat("#,###")
+    private val decimalFormat: DecimalFormat = DecimalFormat("#,###")
 
     private fun longToLocation(packed: Long): Location {
         val x = (packed shl 37 shr 37).toInt()

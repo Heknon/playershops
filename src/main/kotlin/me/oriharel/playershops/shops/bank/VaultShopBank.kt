@@ -5,13 +5,13 @@ import org.bukkit.Bukkit
 import java.util.*
 
 internal class VaultShopBank(balance: Long, @Transient private val economy: Economy) : ShopBank(balance) {
-    override fun takeFromAndDeposit(amount: Int, takeFrom: UUID) {
+    override fun takeFromAndDeposit(amount: Long, takeFrom: UUID) {
         takeFromAndDeposit(amount) {
             economy.withdrawPlayer(Bukkit.getOfflinePlayer(takeFrom), it.toDouble())
         }
     }
 
-    override fun giveToAndWithdraw(amount: Int, giveTo: UUID) {
+    override fun giveToAndWithdraw(amount: Long, giveTo: UUID) {
         giveToAndWithdraw(amount) {
             economy.depositPlayer(Bukkit.getOfflinePlayer(giveTo), it.toDouble())
         }

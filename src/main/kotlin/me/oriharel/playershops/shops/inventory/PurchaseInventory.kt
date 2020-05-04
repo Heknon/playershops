@@ -13,7 +13,6 @@ import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.ifOnline
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
@@ -122,7 +121,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                 .title(InventoryConstants.PurchaseInventory.TITLE)
                 .size(InventoryConstants.PurchaseInventory.ROWS, InventoryConstants.PurchaseInventory.COLUMNS)
                 .closeable(InventoryConstants.PurchaseInventory.CLOSEABLE)
-                .provider(PurchaseInventory(PlayerShops.instance))
+                .provider(PurchaseInventory(PlayerShops.INSTANCE))
                 .build()
     }
 

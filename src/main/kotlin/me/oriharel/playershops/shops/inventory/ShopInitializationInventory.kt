@@ -11,7 +11,6 @@ import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.shop.ShopType
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.toTitleCase
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -72,7 +71,7 @@ class ShopInitializationInventory(private val playerShops: PlayerShops) : Invent
 
 
     private fun applyChanges(player: Player, contents: InventoryContents) {
-        val shopManager = PlayerShops.instance.shopManager
+        val shopManager = PlayerShops.INSTANCE.shopManager
         var shop = getShop(contents)!!
 
         val shopifiedItem = getShopifiedItem(contents)
@@ -190,7 +189,7 @@ class ShopInitializationInventory(private val playerShops: PlayerShops) : Invent
     companion object {
         val INVENTORY: SmartInventory = SmartInventory.builder()
                 .id(InventoryConstants.InitializationInventory.ID)
-                .provider(ShopInitializationInventory(PlayerShops.instance))
+                .provider(ShopInitializationInventory(PlayerShops.INSTANCE))
                 .size(InventoryConstants.InitializationInventory.ROWS, InventoryConstants.InitializationInventory.COLUMNS)
                 .title(InventoryConstants.InitializationInventory.TITLE)
                 .closeable(InventoryConstants.InitializationInventory.CLOSEABLE)
