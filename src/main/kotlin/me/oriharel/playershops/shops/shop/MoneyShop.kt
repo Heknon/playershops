@@ -28,6 +28,6 @@ abstract class MoneyShop(
     val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS)
 
     override fun openPlayerGUI(player: Player) {
-        PurchaseInventory.inventory.open(player)
+        PurchaseInventory.INVENTORY.open(player)
     }
 }

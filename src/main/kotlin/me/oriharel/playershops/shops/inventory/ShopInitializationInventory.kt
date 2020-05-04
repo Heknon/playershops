@@ -1,5 +1,6 @@
 package me.oriharel.playershops.shops.inventory
 
+import com.google.common.base.Preconditions
 import fr.minuskube.inv.ClickableItem
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
@@ -12,122 +13,139 @@ import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.toTitleCase
 import org.bukkit.ChatColor
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.ItemStack
 
 class ShopInitializationInventory(private val playerShops: PlayerShops) : InventoryProvider {
 
-    private var cachedPrice: Long? = null
-    private var cachedType: ShopType? = null
-    private var cachedItemStack: ItemStack? = null
-
     override fun init(player: Player, contents: InventoryContents) {
-        contents.fill(ClickableItem.empty(KItemStack(material = Material.GRAY_STAINED_GLASS_PANE, displayName = "")))
+        Preconditions.checkState(getShop(contents) is PlayerShop || getShop(contents) == null, "An invalid shop has been passed down!")
 
-        contents.setProperty("shopifiedItem", null).setProperty("shopType", ShopType.SHOWCASE).setProperty("prevShopType", ShopType.SHOWCASE).setProperty("itemPricePer", -1)
+        setShopifiedItem(contents, null).setShopType(contents, ShopType.SHOWCASE).setPrice(contents, -1)
 
-        contents.set(0, 2, ClickableItem.of(getShopTypeSwitcherItem()) {
-            switchShopType(contents)
-        })
+        contents.fill(
+                ClickableItem.empty(
+                        KItemStack(
+                                material = Material.GRAY_STAINED_GLASS_PANE,
+                                displayName = ""
+                        )))
 
-        contents.set(0, 4, ClickableItem.of(KItemStack(
-                material = Material.CYAN_STAINED_GLASS_PANE,
-                displayName = "&6Place the item to shopify here"
-        )) {
-            switchItemShopified(it, contents)
-        })
+        contents.set(0, 2,
+                ClickableItem.of(
+                        getShopTypeSwitcherItem()) {
+                    switchShopType(contents)
+                })
 
-        contents.set(0, 6, ClickableItem.of(KItemStack(
-                material = Material.PURPLE_STAINED_GLASS_PANE,
-                displayName = "&6Place the item to shopify here"
-        )) {
-            val shopType: ShopType = contents.property("shopType")
-            playerShops.createSignInput(player, "&6Price: &9", "&6Enter " + shopType.toTitleCase() + " price") { p, strings ->
-                val price: Long? = strings[0].replace("\\D", "").toLongOrNull()
-                // TESTME: Check if exiting the GUI exits the inventory as well
-                if (price == null) {
-                    p.sendMessage("§c&l[!] &eInvalid number!")
-                    return@createSignInput true
-                } else if (price < 0) {
-                    p.sendMessage("§c&l[!] &ePrice must be a non-negative number!")
-                    return@createSignInput true
-                }
+        contents.set(0, 4,
+                ClickableItem.of(
+                        KItemStack(
+                                material = Material.CYAN_STAINED_GLASS_PANE,
+                                displayName = "&6Place the item to shopify here"
+                        )) {
+                    switchItemShopified(it, contents)
+                })
 
-                contents.property("itemPricePer", price)
-                cachedPrice = price
-                return@createSignInput true
-            }
-        })
+        contents.set(0, 6,
+                ClickableItem.of(
+                        KItemStack(
+                                material = Material.PURPLE_STAINED_GLASS_PANE,
+                                displayName = "&6Place the item to shopify here"
+                        )) {
+                    changePrice(contents, player)
+                })
 
-        contents.set(
-                2,
-                4,
-                ClickableItem.of(KItemStack(
-                        material = Material.ORANGE_STAINED_GLASS_PANE,
-                        displayName = "&6DONE",
-                        lore = listOf("&6These settings are changeable")
-                )) {
-                    val shopManager = PlayerShops.instance.shopManager
-                    val block: Block = contents.property("shopBlock")
-                    var shop: PlayerShop = PlayerShops.instance.shopManager.getPlayerShopFromBlock(block)
-                            ?: return@of
-                    if (cachedItemStack == null) {
-                        player.sendMessage("§c§l[!] §eYou must enter a item to shopify!")
-                        return@of
-                    }
-                    if (cachedType != null && shop.getType() != cachedType) {
-                        shop = shopManager.shopFactory.convertShop(shop, cachedType!!)
-                    }
-
-                    if (cachedPrice == null && shop is MoneyShop) {
-                        player.sendMessage("§c§l[!] §eYou must enter a price!")
-                        return@of
-                    }
-                    if (shop is MoneyShop) {
-                        shop.price = cachedPrice!!
-                    }
-
-                    shop.item = cachedItemStack!!
-
-                    shopManager.setPlayerShopBlockData(block, shop)
-                    player.sendMessage("§b§l[INFO] §eInitialized shop!")
-                    inventory.close(player)
-                }
-        )
+        contents.set(2, 4,
+                ClickableItem.of(
+                        KItemStack(
+                                material = Material.ORANGE_STAINED_GLASS_PANE,
+                                displayName = "&6DONE",
+                                lore = listOf("&6These settings are changeable")
+                        )) {
+                    applyChanges(player, contents)
+                })
     }
 
-    override fun update(player: Player, contents: InventoryContents) {
-        val prevShopType: ShopType = contents.property("prevShopType")
-        val currShopType: ShopType = contents.property("shopType")
+    override fun update(p: Player, c: InventoryContents) {
 
-        if (prevShopType != currShopType) {
-            contents.set(0, 2, ClickableItem.of(getShopTypeSwitcherItem(currShopType)) {
-                switchShopType(contents)
-            })
+    }
+
+
+    private fun applyChanges(player: Player, contents: InventoryContents) {
+        val shopManager = PlayerShops.instance.shopManager
+        var shop = getShop(contents)!!
+
+        val shopifiedItem = getShopifiedItem(contents)
+        val shopType = getShopType(contents)
+        val price = getPrice(contents)
+
+        if (shopifiedItem == null) {
+            player.sendMessage("§c§l[!] §eYou must enter a item to shopify!")
+            return
         }
+        if (shop.getType() != shopType) {
+            shop = shopManager.shopFactory.convertShop(shop, shopType)
+        }
+
+        if (price == -1L && shop is MoneyShop) {
+            player.sendMessage("§c§l[!] §eYou must enter a price!")
+            return
+        }
+        if (shop is MoneyShop) {
+            shop.price = price
+        }
+
+        shop.item = shopifiedItem
+
+        shopManager.setPlayerShopBlockData(shop.block, shop)
+        player.sendMessage("§b§l[INFO] §eInitialized shop!")
+        INVENTORY.close(player)
     }
 
     private fun switchShopType(contents: InventoryContents) {
-        val currType: ShopType = contents.property("shopType")
+        val currType: ShopType = getShopType(contents)
         val nextType: ShopType = currType.next()
-        contents.property("prevShopType", currType)
-        contents.property("shopType", nextType)
-        cachedType = nextType
+        setShopType(contents, nextType)
+
+        contents.set(0, 2, ClickableItem.of(getShopTypeSwitcherItem(nextType)) {
+            switchShopType(contents)
+        })
     }
 
     private fun switchItemShopified(e: InventoryClickEvent, contents: InventoryContents) {
         val cursor = e.cursor
+        val clone = cursor?.clone()
 
         if (cursor != null && cursor.type != Material.AIR) {
-            contents.set(0, 4, ClickableItem.of(cursor) {
+            cursor.amount -= 1
+            e.isCancelled = true
+            contents.set(0, 4, ClickableItem.of(clone) {
                 switchItemShopified(e, contents)
             })
-            contents.property("shopifiedItem", cursor)
-            cachedItemStack = cursor
+
+            setShopifiedItem(contents, cursor)
         }
+
         e.whoClicked.sendMessage("§c§l[!] §eYou must be holding an item when trying to switch the item shopified!")
+    }
+
+    private fun changePrice(contents: InventoryContents, player: Player) {
+        val shopType: ShopType = getShopType(contents)
+        playerShops.createSignInput(player, "&6Price: &9", "&6Enter " + shopType.toTitleCase() + " price") { p, strings ->
+            val price: Long? = strings[0].replace("\\D", "").toLongOrNull()
+
+            // TESTME: Check if exiting the GUI exits the inventory as well
+            if (price == null) {
+                p.sendMessage("§c&l[!] &eInvalid number!")
+                return@createSignInput true
+            } else if (price < 0) {
+                p.sendMessage("§c&l[!] &ePrice must be a non-negative number!")
+                return@createSignInput true
+            }
+
+            setPrice(contents, price)
+            return@createSignInput true
+        }
     }
 
     private fun getShopTypeSwitcherItem(shopType: ShopType? = null): ItemStack {
@@ -138,13 +156,44 @@ class ShopInitializationInventory(private val playerShops: PlayerShops) : Invent
         )
     }
 
+    private fun getPrice(contents: InventoryContents): Long {
+        return contents.property(InventoryConstants.PRICE_CONTENT_ID)
+    }
+
+    private fun setPrice(contents: InventoryContents, price: Long): ShopInitializationInventory {
+        contents.property(InventoryConstants.PRICE_CONTENT_ID, price)
+        return this
+    }
+
+    private fun getShopType(contents: InventoryContents): ShopType {
+        return contents.property(InventoryConstants.SHOP_TYPE_CONTENT_ID)
+    }
+
+    private fun setShopType(contents: InventoryContents, shopType: ShopType): ShopInitializationInventory {
+        contents.setProperty(InventoryConstants.SHOP_TYPE_CONTENT_ID, shopType)
+        return this
+    }
+
+    private fun getShopifiedItem(contents: InventoryContents): ItemStack? {
+        return contents.property(InventoryConstants.SHOPIFIED_ITEM_CONTENT_ID)
+    }
+
+    private fun setShopifiedItem(contents: InventoryContents, shopifiedItem: ItemStack?): ShopInitializationInventory {
+        contents.setProperty(InventoryConstants.SHOPIFIED_ITEM_CONTENT_ID, shopifiedItem)
+        return this
+    }
+
+    private fun getShop(contents: InventoryContents): PlayerShop? {
+        return contents.property(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID)
+    }
+
     companion object {
-        val inventory: SmartInventory = SmartInventory.builder()
-                .id("shopInitializerInventory")
+        val INVENTORY: SmartInventory = SmartInventory.builder()
+                .id(InventoryConstants.InitializationInventory.ID)
                 .provider(ShopInitializationInventory(PlayerShops.instance))
-                .size(3, 9)
-                .title("${ChatColor.BLUE}Setup your shop!")
-                .closeable(false)
+                .size(InventoryConstants.InitializationInventory.ROWS, InventoryConstants.InitializationInventory.COLUMNS)
+                .title(InventoryConstants.InitializationInventory.TITLE)
+                .closeable(InventoryConstants.InitializationInventory.CLOSEABLE)
                 .build()
     }
 }

@@ -25,8 +25,8 @@ abstract class PlayerShop(
      */
     protected open fun openSettings(player: Player) {
         player.sendMessage("§c§l[!] §eOpening the settings GUI of your shop")
-        ShopSettingsInventory.inventory.open(player)
-        ShopSettingsInventory.inventory.manager.getContents(player).get().setProperty("shop", this)
+        ShopSettingsInventory.INVENTORY.open(player)
+        ShopSettingsInventory.INVENTORY.manager.getContents(player).get().setProperty("shop", this)
     }
 
     /**
@@ -55,8 +55,11 @@ abstract class PlayerShop(
     }
 
     fun opeInitializationGUI(player: Player) {
-        ShopInitializationInventory.inventory.open(player)
-        ShopInitializationInventory.inventory.manager.getContents(player).get().setProperty("shopBlock", block)
+        ShopInitializationInventory.INVENTORY.open(player)
+        ShopInitializationInventory.INVENTORY.manager.getContents(player)
+                .get()
+                .setProperty(ShopInitializationInventory.PASSED_DOWN_SHOP_CONTENT_ID, this)
+        player.sendMessage("§b§l[INFO] §bInitializing shop")
     }
 
     fun getType(): ShopType {
