@@ -72,7 +72,7 @@ object InventoryConstants {
             return contents.property(ON_CLICK_CONTENT_ID)
         }
 
-        fun getPrice(contents: InventoryContents): Long {
+        fun getPrice(contents: InventoryContents): Long? {
             return contents.property(PRICE_CONTENT_ID)
         }
 

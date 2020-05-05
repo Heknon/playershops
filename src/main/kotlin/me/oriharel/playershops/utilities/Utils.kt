@@ -2,6 +2,11 @@ package me.oriharel.playershops.utilities
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import fr.minuskube.inv.InventoryListener
+import fr.minuskube.inv.InventoryManager
+import fr.minuskube.inv.SmartInventory
+import fr.minuskube.inv.content.InventoryContents
+import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.serializers.PlayerShopTypeAdapter
 import me.oriharel.playershops.serializers.ShopBankTypeAdapter
 import me.oriharel.playershops.serializers.UUIDTypeAdapter
@@ -14,6 +19,9 @@ import net.minecraft.server.v1_15_R1.NBTTagCompound
 import org.bukkit.*
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import java.text.DecimalFormat
@@ -62,12 +70,72 @@ object Utils {
     }
 
     fun Player.giveItem(item: ItemStack): Player {
+        if (this.itemOnCursor.isSimilar(item) && this.itemOnCursor.amount + item.amount < 65) {
+            this.itemOnCursor.amount += item.amount
+            setItemOnCursor(itemOnCursor)
+            return this
+        }
         if (this.inventory.firstEmpty() == -1) {
             this.location.world?.dropItemNaturally(this.location, item)
         } else {
             this.inventory.addItem(item)
         }
         return this
+    }
+
+    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents, delay: Long) {
+        Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
+            run {
+                openWithContents(player, contents)
+            }
+        }, delay)
+    }
+
+    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents): Inventory {
+
+        val oldInv = manager.getInventory(player)
+        val listenersField = SmartInventory::class.java.getDeclaredField("listeners")
+        val setContents = InventoryManager::class.java
+                .getDeclaredMethod("setContents", Player::class.java, InventoryContents::class.java)
+        val setInventory = InventoryManager::class.java
+                .getDeclaredMethod("setInventory", Player::class.java, SmartInventory::class.java)
+        setContents.isAccessible = true
+        setInventory.isAccessible = true
+        listenersField.isAccessible = true
+
+        oldInv.ifPresent {
+            (listenersField.get(it) as List<InventoryListener<out Event>>)
+                    .filter { listener: InventoryListener<out Event> -> listener.type == InventoryCloseEvent::class.java }
+                    .forEach { listener: InventoryListener<out Event> ->
+                        (listener as InventoryListener<InventoryCloseEvent>)
+                                .accept(InventoryCloseEvent(player.openInventory))
+                    }
+            setInventory.invoke(manager, player, null)
+        }
+
+        setContents.invoke(manager, player, contents)
+        provider.init(player, contents)
+
+        val opener = manager.findOpener(type)
+                .orElseThrow { IllegalStateException("No opener found for the inventory type " + type.name) }
+        val handle = opener.open(this, player)
+
+        setInventory.invoke(manager, player, this)
+
+        return handle
+
+/*        this.open(player)
+        val method = InventoryManager::class.java
+                .getDeclaredMethod("setContents", Player::class.java, InventoryContents::class.java)
+        method.isAccessible = true
+        method.invoke(this.manager, player, contents)*/
+    }
+
+    fun InventoryContents.getPropertiesReference(): Map<String, Any> {
+        val impl = InventoryContents::class.java.declaredClasses[0]
+        val field = impl.getDeclaredField("properties")
+        field.isAccessible = true
+        return field.get(this) as Map<String, Any>
     }
 
     fun getItemStackUnhandledNBT(itemStack: ItemStack): MutableMap<String?, NBTBase?> {

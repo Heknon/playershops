@@ -56,7 +56,7 @@ class PlayerShopFactory(private val economy: Economy) {
     fun <T : PlayerShop> convertShop(
             shop: T,
             toType: ShopType,
-            bank: ShopBank? = null,
+            bank: ShopBank?,
             price: Long? = null
     ): T {
         val bankToUse: ShopBank? = if (shop is MoneyShop && bank == null) shop.bank else bank

@@ -8,6 +8,7 @@ import fr.minuskube.inv.content.InventoryProvider
 import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -16,25 +17,28 @@ class ShopSettingsInventory : InventoryProvider {
 
     override fun init(player: Player, contents: InventoryContents) {
 
-        val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
+        Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
+            run {
+                val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
 
-        InventoryConstants.ConstantUtilities.setUseBank(contents, shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!)
-        InventoryConstants.ConstantUtilities.setUseMobCoins(contents, shop.settings.contains(ShopSetting.USE_MOB_COINS))
+                InventoryConstants.ConstantUtilities.setUseBank(contents, shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!)
+                InventoryConstants.ConstantUtilities.setUseMobCoins(contents, shop.settings.contains(ShopSetting.USE_MOB_COINS))
 
-        contents.set(0, 4,
-                ClickableItem.of(
-                        KItemStack(
-                                material = Material.EMERALD_BLOCK,
-                                displayName = "&6Reinitialize your shop"
-                        )
-                ) {
-                    // Reinitialize a shop
-                    shop.opeInitializationGUI(player)
-                })
+                contents.set(0, 4,
+                        ClickableItem.of(
+                                KItemStack(
+                                        material = Material.EMERALD_BLOCK,
+                                        displayName = "&6Reinitialize your shop"
+                                )
+                        ) {
+                            // Reinitialize a shop
+                            shop.opeInitializationGUI(player)
+                        })
 
-        buildMobCoinsItem(contents, player)
-        buildBankItem(contents, player)
-
+                buildMobCoinsItem(contents, player)
+                buildBankItem(contents, player)
+            }
+        }, 1)
     }
 
     override fun update(player: Player, contents: InventoryContents) {

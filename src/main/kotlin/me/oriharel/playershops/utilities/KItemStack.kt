@@ -13,7 +13,7 @@ class KItemStack @JvmOverloads constructor(
         displayName: String? = null,
         lore: List<String>? = null,
         metadataModifier: ((ItemMeta) -> Unit)? = null,
-        nbtModifier: ((Map<String?, NBTBase?>) -> Unit)? = null
+        nbtModifier: ((MutableMap<String?, NBTBase?>) -> Unit)? = null
 ) : ItemStack(
         material,
         amount
