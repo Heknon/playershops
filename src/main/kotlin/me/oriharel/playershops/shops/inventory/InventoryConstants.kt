@@ -3,6 +3,9 @@ package me.oriharel.playershops.shops.inventory
 import fr.minuskube.inv.content.InventoryContents
 import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.shop.ShopType
+import me.oriharel.playershops.utilities.KItemStack
+import org.bukkit.Material
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
 object InventoryConstants {
@@ -22,20 +25,29 @@ object InventoryConstants {
         const val CLOSEABLE: Boolean = true
     }
 
-    object InitializationInventory {
-        const val ID: String = "shopInitializationInventoryID"
-        const val TITLE: String = "§1Setup your shop!"
+    object SetItemInventory {
+        const val ID: String = "shopSetItemInventoryID"
+        const val TITLE: String = "Set Item - Player Shop"
         const val ROWS: Int = 3
         const val COLUMNS: Int = 9
-        const val CLOSEABLE: Boolean = false
+        const val CLOSEABLE: Boolean = true
+    }
+
+    object StorageInventory {
+        const val ID: String = "shopStorageInventoryID"
+        const val TITLE: String = "Storage - Player Shop"
+        const val ROWS: Int = 3
+        const val COLUMNS: Int = 9
+        const val CLOSEABLE: Boolean = true
     }
 
     object SettingsInventory {
         const val ID: String = "shopSettingsInventoryID"
-        const val TITLE: String = "§1Settings"
-        const val ROWS: Int = 3
+        const val TITLE: String = "Player Shop"
+        const val ROWS: Int = 4
         const val COLUMNS: Int = 9
         const val CLOSEABLE: Boolean = true
+
     }
 
     object BankInventory {
@@ -51,7 +63,19 @@ object InventoryConstants {
         const val TITLE: String = "Confirm"
         const val ROWS: Int = 1
         const val COLUMNS: Int = 9
-        const val CLOSEABLE: Boolean = false
+        const val CLOSEABLE: Boolean = true
+    }
+
+    object Item {
+        val EMPTY_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.GRAY_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+            it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
+        })
+        val EMPTY_YELLOW_STAINED_GLASS_PANE = KItemStack(material = Material.YELLOW_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+            it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
+        })
+        val EMPTY_WHITE_STAINED_GLASS_PANE = KItemStack(material = Material.WHITE_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+            it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
+        })
     }
 
     object ConstantUtilities {

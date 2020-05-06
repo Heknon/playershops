@@ -62,8 +62,8 @@ class PlayerShopFactory(private val economy: Economy) {
         val bankToUse: ShopBank? = if (shop is MoneyShop && bank == null) shop.bank else bank
 
         return when (toType) {
-            ShopType.BUY -> BuyShop(bankToUse, economy, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SELL -> SellShop(bankToUse, economy, price!!, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.BUY -> BuyShop(bankToUse, economy, price, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.SELL -> SellShop(bankToUse, economy, price, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
             ShopType.SHOWCASE -> ShowcaseShop(shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
         } as T
     }

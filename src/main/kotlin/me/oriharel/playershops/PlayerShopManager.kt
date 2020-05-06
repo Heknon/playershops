@@ -15,11 +15,11 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class PlayerShopManager(internal val playerShops: PlayerShops) {
-    val shopCache: MutableMap<UUID, MutableMap<Long, PlayerShop>> = HashMap()
     val shopFactory: PlayerShopFactory = PlayerShopFactory(playerShops.economy)
+    val serializer = Utils.getSerializer<ShopBank, PlayerShop>(playerShops.economy, shopFactory)
+    private val shopCache: MutableMap<UUID, MutableMap<Long, PlayerShop>> = HashMap()
     private val playerShopNamespacedKey: NamespacedKey = NamespacedKey(playerShops, "playerShop")
     private val playerShopPersistentDataType: PersistentDataType<String, PlayerShop> = PlayerShopPersistentDataType(this)
-    val serializer = Utils.getSerializer<ShopBank, PlayerShop>(playerShops.economy, shopFactory)
 
     fun getShopItem(item: ItemStack? = null, shop: PlayerShop? = null): ShopItem? {
         return if (item != null && shop == null) {
@@ -33,6 +33,11 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
         }
     }
 
+    /**
+     * fetches a player shop from a block.
+     * if the player shop does not exist in the playershop cache, the data is fetched from the block, set in cache and returned.
+     * the cache is reset on restart. this functionality provides better performance once a shop is already opened
+     */
     fun getPlayerShopFromBlock(block: Block?): PlayerShop? {
         if (block == null) return null
         if (block.state !is TileState) return null
@@ -68,8 +73,22 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
         if (blockState !is TileState) return false
 
         blockState.persistentDataContainer.set(playerShopNamespacedKey, playerShopPersistentDataType, shop)
+        blockState.update()
         if (!shopCache.containsKey(block.world.uid)) shopCache[block.world.uid] = mutableMapOf()
         shopCache[block.world.uid]!![block.location.toLong()] = shop
+        return true
+    }
+
+    fun removePlayerShop(block: Block?): Boolean {
+        if (block == null) return false
+        val blockState: BlockState = block.state
+        if (blockState !is TileState) return false
+
+        val shop = getPlayerShopFromBlock(block)
+
+        shop?.clearHologram(playerShops)
+        blockState.persistentDataContainer.remove(playerShopNamespacedKey)
+        shopCache[block.world.uid]?.remove(block.location.toLong())
         return true
     }
 

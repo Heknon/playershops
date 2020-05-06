@@ -11,6 +11,7 @@ import me.oriharel.playershops.shops.shop.MoneyShop
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
+import me.oriharel.playershops.utilities.Utils.openWithContents
 import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -23,7 +24,6 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
     override fun init(player: Player, contents: InventoryContents) {
         Bukkit.getScheduler().runTaskLater(playerShops, Runnable {
             val shop = InventoryConstants.ConstantUtilities.getShop(contents) as MoneyShop
-            print(shop)
             val bank = shop.bank!!
             val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents)
                     ?: shop.settings?.contains(ShopSetting.USE_MOB_COINS)!!
@@ -44,7 +44,8 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
             contents.set(1, 2,
                     ClickableItem.of(
                             KItemStack(
-                                    material = Material.MAGMA_CREAM
+                                    material = Material.MAGMA_CREAM,
+                                    displayName = "&3WITHDRAW"
                             )) {
                         playerShops.createSignInput(
                                 player,
@@ -53,7 +54,9 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                                 "&b" + if (useMobCoins) "Zen Coins" else "Money",
                                 "&b to withdraw"
                         ) { _, strings ->
-                            val amount: Long? = strings[0].toLongOrNull()
+                            val split = strings[0].split("§9")
+                            val re = "-\\d+|\\d+".toRegex()
+                            val amount: Long? = if (split.size < 2) null else re.find(split[1])?.value?.toLongOrNull()
 
                             when {
                                 amount == null -> {
@@ -84,16 +87,17 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                     ClickableItem.empty(
                             KItemStack(
                                     material = Material.EMERALD_BLOCK,
-                                    displayName = "&6BALANCE",
+                                    displayName = "&3BALANCE",
                                     lore = listOf(
-                                            "&d${bank.balance.format()}&e " + if (useMobCoins) "Zen Coins" else "Money"
+                                            "&b${bank.balance.format()}&e " + if (useMobCoins) "Zen Coins" else "Money"
                                     )
                             )))
 
             contents.set(1, 6,
                     ClickableItem.of(
                             KItemStack(
-                                    material = Material.PAPER
+                                    material = Material.PAPER,
+                                    displayName = "&3DEPOSIT"
                             )) {
                         if (shop !is Depositable) {
                             player.sendMessage("§c§l[!] §eYou cannot deposit into this shop!")
@@ -106,7 +110,9 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                                 "&b" + if (useMobCoins) "Zen Coins" else "Money",
                                 "&b to deposit"
                         ) { _, strings ->
-                            val amount: Long? = strings[0].toLongOrNull()
+                            val split = strings[0].split("§9")
+                            val re = "-\\d+|\\d+".toRegex()
+                            val amount: Long? = if (split.size < 2) null else re.find(split[1])?.value?.toLongOrNull()
                             val userBal: Long =
                                     if (useMobCoins) MobCoinsAPI.getProfileManager().getProfile(player).mobCoins.toLong()
                                     else playerShops.economy.getBalance(player).toLong()
@@ -161,6 +167,7 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                         shop.settings?.remove(ShopSetting.USE_INTERNAL_BANK)
                     }
 
+                    shop.buildHologram(PlayerShops.INSTANCE)
                     PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(shop.block!!, shop)
                 })
                 .manager(PlayerShops.INSTANCE.inventoryManager)

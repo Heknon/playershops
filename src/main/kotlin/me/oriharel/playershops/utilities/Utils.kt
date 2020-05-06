@@ -69,13 +69,13 @@ object Utils {
         return this
     }
 
-    fun Player.giveItem(item: ItemStack): Player {
+    fun Player.giveItem(item: ItemStack, dropIfNoPlace: Boolean = false): Player {
         if (this.itemOnCursor.isSimilar(item) && this.itemOnCursor.amount + item.amount < 65) {
             this.itemOnCursor.amount += item.amount
             setItemOnCursor(itemOnCursor)
             return this
         }
-        if (this.inventory.firstEmpty() == -1) {
+        if (dropIfNoPlace && this.inventory.firstEmpty() == -1) {
             this.location.world?.dropItemNaturally(this.location, item)
         } else {
             this.inventory.addItem(item)
@@ -123,12 +123,21 @@ object Utils {
         setInventory.invoke(manager, player, this)
 
         return handle
+    }
 
-/*        this.open(player)
-        val method = InventoryManager::class.java
-                .getDeclaredMethod("setContents", Player::class.java, InventoryContents::class.java)
-        method.isAccessible = true
-        method.invoke(this.manager, player, contents)*/
+    fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents) {
+        this.open(player)
+        this.manager.getContents(player).ifPresent {
+            for (entry in contents.getPropertiesReference()) {
+                it.setProperty(entry.key, entry.value)
+            }
+        }
+    }
+
+    fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents, delay: Long) {
+        Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
+            openWithProperties(player, contents)
+        }, delay)
     }
 
     fun InventoryContents.getPropertiesReference(): Map<String, Any> {
@@ -136,6 +145,12 @@ object Utils {
         val field = impl.getDeclaredField("properties")
         field.isAccessible = true
         return field.get(this) as Map<String, Any>
+    }
+
+    fun String.extractNumber(): Number? {
+        val re = "-\\d+|\\d+".toRegex()
+        val extractedNumberVal = re.find(this)?.value
+        return extractedNumberVal?.toInt()
     }
 
     fun getItemStackUnhandledNBT(itemStack: ItemStack): MutableMap<String?, NBTBase?> {

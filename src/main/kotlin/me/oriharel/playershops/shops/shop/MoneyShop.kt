@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 
 abstract class MoneyShop(
-        val bank: ShopBank?,
+        var bank: ShopBank?,
         val economy: Economy,
         var price: Long?,
         item: ItemStack?,

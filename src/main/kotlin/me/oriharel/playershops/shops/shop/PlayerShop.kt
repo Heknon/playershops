@@ -1,11 +1,14 @@
 package me.oriharel.playershops.shops.shop
 
+import com.gmail.filoghost.holographicdisplays.api.Hologram
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.inventory.InventoryConstants
-import me.oriharel.playershops.shops.inventory.ShopInitializationInventory
 import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
 import me.oriharel.playershops.utilities.Utils.format
+import me.oriharel.playershops.utilities.Utils.giveItem
+import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
+import me.oriharel.playershops.utilities.Utils.toTitleCase
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -17,8 +20,9 @@ abstract class PlayerShop(
         var item: ItemStack?,
         var block: Block?,
         var owner: UUID?,
-        val allowedMutators: MutableSet<UUID>?,
-        val settings: MutableSet<ShopSetting>?
+        val storageSize: Int,
+        val allowedMutators: MutableSet<UUID>,
+        val settings: MutableSet<ShopSetting>
 ) {
 
     /**
@@ -44,24 +48,46 @@ abstract class PlayerShop(
         owner = e.player.uniqueId
         block = e.block
         playerShops.shopManager.setPlayerShopBlockState(e.block, this)
-        opeInitializationGUI(e.player)
     }
 
     fun buildHologram(playerShops: PlayerShops) {
-        val hologram = HologramsAPI.getHolograms(playerShops).find { it.location.block == block }
-                ?: HologramsAPI.createHologram(playerShops, block?.location?.add(0.0, 2.0, 0.0))
+        val hologram = getHologram(playerShops)
+
+        var itemText = "§r§7" + (item?.itemMeta?.displayName ?: "§cAbsolutely nothing!")
+        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) storageSize - item!!.amount - 1 else if (this is SellShop) item!!.amount - 1 else ""})"
         var index = 0
-        hologram.insertTextLine(index++, getType().toString() + "ING")
-        if (this is MoneyShop) hologram.insertTextLine(index++, "Price: ${price?.format()}" + if (useZenCoins) " Zen Coins" else "$")
+        clearHologram(playerShops, hologram)
+
+        hologram.insertTextLine(index++, "§e${owner?.toOfflinePlayer()?.name} §dis ${getType().toTitleCase()}...")
+        hologram.insertTextLine(index++, itemText)
+        if (this is MoneyShop) hologram.insertTextLine(index++, "§fPrice: §a" + (if (!useZenCoins) "$" else "") + (price?.format()
+                ?: "n/a") + (if (useZenCoins) " Zen Coins" else ""))
         hologram.insertItemLine(index, item)
     }
 
-    fun opeInitializationGUI(player: Player) {
-        ShopInitializationInventory.INVENTORY.open(player)
-        ShopInitializationInventory.INVENTORY.manager.getContents(player)
-                .get()
-                .setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, this)
-        player.sendMessage("§b§l[INFO] §bInitializing shop")
+    fun clearHologram(playerShops: PlayerShops, hologram: Hologram? = null) {
+        val holo = hologram ?: getHologram(playerShops)
+        print("HOLOGRAM: $holo")
+        holo.clearLines()
+    }
+
+    private fun getHologram(playerShops: PlayerShops): Hologram {
+        val placeLoc = block?.location?.add(0.5, 2.5, 0.5)
+        return HologramsAPI.getHolograms(playerShops).find { it.location == placeLoc }
+                ?: HologramsAPI.createHologram(playerShops, placeLoc)
+    }
+
+    /**
+     * destroy a shop. delete all of it's references and hologram.
+     * if a player is passed, give him the shop item.
+     */
+    fun destroy(player: Player? = null) {
+        val playerShops = PlayerShops.INSTANCE
+        val shopManager = playerShops.shopManager
+        val shopItem = shopManager.getShopItem(shop = this)!!
+        clearHologram(playerShops)
+        player?.giveItem(shopItem, false)
+        shopManager.removePlayerShop(block)
     }
 
     fun getType(): ShopType {
@@ -74,6 +100,10 @@ abstract class PlayerShop(
         } else {
             openPlayerGUI(Bukkit.getPlayer(opener)!!)
         }
+    }
+
+    override fun toString(): String {
+        return "PlayerShop(item=$item, block=$block, owner=$owner, storageSize=$storageSize, allowedMutators=$allowedMutators, settings=$settings)"
     }
 
 
