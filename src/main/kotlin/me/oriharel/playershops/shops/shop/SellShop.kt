@@ -16,16 +16,18 @@ internal class SellShop(
         bank: ShopBank?,
         economy: Economy,
         price: Long?,
+        storageSize: Long,
         item: ItemStack?,
         block: Block?,
         owner: UUID?,
-        allowedMutators: MutableSet<UUID>?,
-        settings: MutableSet<ShopSetting>?
+        allowedMutators: MutableSet<UUID>,
+        settings: MutableSet<ShopSetting>
 ) : MoneyShop(
         bank,
-        economy,
         price,
+        economy,
         item,
+        storageSize,
         block,
         owner,
         allowedMutators,

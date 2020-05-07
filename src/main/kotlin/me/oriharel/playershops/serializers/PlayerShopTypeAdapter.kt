@@ -30,6 +30,7 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
         obj.add("bank", ctx.serialize(bank, ShopBank::class.java))
         obj.add("item", ctx.serialize(shop.item?.serialize()))
         obj.add("price", JsonPrimitive(price ?: -1))
+        obj.add("storageSize", JsonPrimitive(shop.storageSize))
 
         return obj
     }
@@ -47,7 +48,8 @@ open class PlayerShopTypeAdapter<T : PlayerShop>(protected val shopFactory: Play
                 owner = ctx.deserialize(obj.get("owner"), UUID::class.java),
                 bank = ctx.deserialize(obj.get("bank"), ShopBank::class.java),
                 itemStack = if (obj.get("item") == null) null else ItemStack.deserialize(ctx.deserialize(obj.get("item"), Map::class.java)),
-                price = obj.get("price").asLong
+                price = obj.get("price").asLong,
+                storageSize = obj.get("storageSize").asLong
         )
     }
 

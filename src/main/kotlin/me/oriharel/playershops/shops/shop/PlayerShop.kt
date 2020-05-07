@@ -3,10 +3,12 @@ package me.oriharel.playershops.shops.shop
 import com.gmail.filoghost.holographicdisplays.api.Hologram
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import me.oriharel.playershops.PlayerShops
+import me.oriharel.playershops.shops.bank.ShopBank
 import me.oriharel.playershops.shops.inventory.InventoryConstants
 import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
 import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.giveItem
+import me.oriharel.playershops.utilities.Utils.openWithProperties
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
 import org.bukkit.Bukkit
@@ -20,7 +22,9 @@ abstract class PlayerShop(
         var item: ItemStack?,
         var block: Block?,
         var owner: UUID?,
-        val storageSize: Int,
+        var bank: ShopBank?,
+        var price: Long?,
+        val storageSize: Long,
         val allowedMutators: MutableSet<UUID>,
         val settings: MutableSet<ShopSetting>
 ) {
@@ -30,8 +34,7 @@ abstract class PlayerShop(
      */
     protected open fun openSettings(player: Player) {
         player.sendMessage("§c§l[!] §eOpening the settings GUI of your shop")
-        ShopSettingsInventory.INVENTORY.open(player)
-        ShopSettingsInventory.INVENTORY.manager.getContents(player).get().setProperty(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, this)
+        ShopSettingsInventory.INVENTORY.openWithProperties(player, mutableMapOf(Pair(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, this)))
     }
 
     /**
@@ -67,7 +70,6 @@ abstract class PlayerShop(
 
     fun clearHologram(playerShops: PlayerShops, hologram: Hologram? = null) {
         val holo = hologram ?: getHologram(playerShops)
-        print("HOLOGRAM: $holo")
         holo.clearLines()
     }
 
@@ -88,6 +90,24 @@ abstract class PlayerShop(
         clearHologram(playerShops)
         player?.giveItem(shopItem, false)
         shopManager.removePlayerShop(block)
+    }
+
+    /**
+     * like destroy except the shop block isn't removed but replaced with data
+     */
+    fun switch(newShop: PlayerShop) {
+        val playerShops = PlayerShops.INSTANCE
+        val shopManager = playerShops.shopManager
+        clearHologram(playerShops)
+        shopManager.removePlayerShop(block)
+        shopManager.setPlayerShopBlockState(newShop.block!!, newShop)
+    }
+
+    /**
+     * updates the information of the machine stored in a block
+     */
+    fun update() {
+        if (block != null) PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(block!!, this)
     }
 
     fun getType(): ShopType {

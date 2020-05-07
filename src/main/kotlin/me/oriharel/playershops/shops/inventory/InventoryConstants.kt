@@ -70,6 +70,9 @@ object InventoryConstants {
         val EMPTY_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.GRAY_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })
+        val EMPTY_LIGHT_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.LIGHT_GRAY_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+            it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
+        })
         val EMPTY_YELLOW_STAINED_GLASS_PANE = KItemStack(material = Material.YELLOW_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })

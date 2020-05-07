@@ -16,21 +16,23 @@ class ShopCommands(private val playerShops: PlayerShops) : BaseCommand() {
     @Subcommand("give")
     @CommandPermission("playershops.give")
     @CommandCompletion("@players @shopTypes @range:1-10 @boolean @boolean")
-    fun giveShop(executor: CommandSender, player: OnlinePlayer, shopType: ShopType, amount: Int = 1, useZenCoins: Boolean = false, useInternalBank: Boolean = true) {
+    fun giveShop(executor: CommandSender, player: OnlinePlayer, shopType: ShopType, storageSize: Long, amount: Int = 1, useZenCoins: Boolean = false, useInternalBank: Boolean = true) {
         val settings: MutableSet<ShopSetting> = mutableSetOf()
         if (useZenCoins) settings.add(ShopSetting.USE_MOB_COINS)
         if (useInternalBank) settings.add(ShopSetting.USE_INTERNAL_BANK)
-        player.player.giveItem(
-                playerShops.shopManager.getShopItem(
-                        shop = playerShops.shopManager.shopFactory.createNewShop(
-                                shopType,
-                                null,
-                                null,
-                                null,
-                                settings,
-                                0,
-                                null
-                        ))!!)
+        val item = playerShops.shopManager.getShopItem(
+                shop = playerShops.shopManager.shopFactory.createNewShop(
+                        shopType,
+                        null,
+                        null,
+                        null,
+                        settings,
+                        storageSize,
+                        0,
+                        null
+                ))
+        item?.amount = amount
+        player.player.giveItem(item!!)
     }
 
 }

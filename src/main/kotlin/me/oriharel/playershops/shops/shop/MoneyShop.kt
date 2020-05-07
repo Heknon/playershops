@@ -9,23 +9,27 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 
 abstract class MoneyShop(
-        var bank: ShopBank?,
+        bank: ShopBank?,
+        price: Long?,
         val economy: Economy,
-        var price: Long?,
         item: ItemStack?,
+        storageSize: Long,
         block: Block?,
         owner: UUID?,
-        allowedMutators: MutableSet<UUID>?,
-        settings: MutableSet<ShopSetting>?
+        allowedMutators: MutableSet<UUID>,
+        settings: MutableSet<ShopSetting>
 ) : PlayerShop(
         item,
         block,
         owner,
+        bank,
+        price,
+        storageSize,
         allowedMutators,
         settings
 ) {
-    protected val useInternalBank: Boolean = settings?.contains(ShopSetting.USE_INTERNAL_BANK) ?: false
-    val useZenCoins: Boolean = settings?.contains(ShopSetting.USE_MOB_COINS) ?: false
+    protected val useInternalBank: Boolean = settings.contains(ShopSetting.USE_INTERNAL_BANK) ?: false
+    val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS) ?: false
 
     override fun openPlayerGUI(player: Player) {
         PurchaseInventory.INVENTORY.open(player)

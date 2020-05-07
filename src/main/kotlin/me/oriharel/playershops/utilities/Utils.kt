@@ -69,6 +69,16 @@ object Utils {
         return this
     }
 
+    fun Inventory.getItemAmountInInventory(item: ItemStack?): Int {
+        if (item == null) return 0
+        var amount = 0
+        contents.forEach {
+            if (it.isSimilar(item)) amount += it.amount
+        }
+        return amount
+    }
+
+
     fun Player.giveItem(item: ItemStack, dropIfNoPlace: Boolean = false): Player {
         if (this.itemOnCursor.isSimilar(item) && this.itemOnCursor.amount + item.amount < 65) {
             this.itemOnCursor.amount += item.amount
@@ -91,7 +101,7 @@ object Utils {
         }, delay)
     }
 
-    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents): Inventory {
+    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents, preInitContentModifier: ((InventoryContents) -> Unit)? = null): Inventory {
 
         val oldInv = manager.getInventory(player)
         val listenersField = SmartInventory::class.java.getDeclaredField("listeners")
@@ -114,6 +124,7 @@ object Utils {
         }
 
         setContents.invoke(manager, player, contents)
+        preInitContentModifier?.invoke(contents)
         provider.init(player, contents)
 
         val opener = manager.findOpener(type)
@@ -125,13 +136,18 @@ object Utils {
         return handle
     }
 
-    fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents) {
-        this.open(player)
-        this.manager.getContents(player).ifPresent {
-            for (entry in contents.getPropertiesReference()) {
+    fun SmartInventory.openWithProperties(player: Player, properties: Map<String, Any>) {
+        val newContents: InventoryContents = InventoryContents.Impl(this, player)
+        newContents.pagination().page(0)
+        openWithContents(player, newContents) {
+            for (entry in properties) {
                 it.setProperty(entry.key, entry.value)
             }
         }
+    }
+
+    fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents) {
+        openWithProperties(player, contents.getPropertiesReference())
     }
 
     fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents, delay: Long) {
