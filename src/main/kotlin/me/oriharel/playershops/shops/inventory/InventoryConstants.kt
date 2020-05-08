@@ -19,8 +19,8 @@ object InventoryConstants {
 
     object PurchaseInventory {
         const val ID: String = "shopPurchaseInventoryID"
-        const val TITLE: String = "§1SHOP"
-        const val ROWS: Int = 1
+        const val TITLE: String = "Player Shop"
+        const val ROWS: Int = 4
         const val COLUMNS: Int = 9
         const val CLOSEABLE: Boolean = true
     }
@@ -67,16 +67,16 @@ object InventoryConstants {
     }
 
     object Item {
-        val EMPTY_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.GRAY_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+        val EMPTY_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.GRAY_STAINED_GLASS_PANE, displayName = " ", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })
-        val EMPTY_LIGHT_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.LIGHT_GRAY_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+        val EMPTY_LIGHT_GRAY_STAINED_GLASS_PANE = KItemStack(material = Material.LIGHT_GRAY_STAINED_GLASS_PANE, displayName = " ", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })
-        val EMPTY_YELLOW_STAINED_GLASS_PANE = KItemStack(material = Material.YELLOW_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+        val EMPTY_YELLOW_STAINED_GLASS_PANE = KItemStack(material = Material.YELLOW_STAINED_GLASS_PANE, displayName = " ", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })
-        val EMPTY_WHITE_STAINED_GLASS_PANE = KItemStack(material = Material.WHITE_STAINED_GLASS_PANE, displayName = "", metadataModifier = {
+        val EMPTY_WHITE_STAINED_GLASS_PANE = KItemStack(material = Material.WHITE_STAINED_GLASS_PANE, displayName = " ", metadataModifier = {
             it.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
         })
     }

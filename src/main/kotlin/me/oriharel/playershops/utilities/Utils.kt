@@ -96,12 +96,12 @@ object Utils {
     fun SmartInventory.openWithContents(player: Player, contents: InventoryContents, delay: Long) {
         Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
             run {
-                openWithContents(player, contents)
+                openWithContents(player, contents, checkForOldInventory = false)
             }
         }, delay)
     }
 
-    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents, preInitContentModifier: ((InventoryContents) -> Unit)? = null): Inventory {
+    fun SmartInventory.openWithContents(player: Player, contents: InventoryContents, preInitContentModifier: ((InventoryContents) -> Unit)? = null, checkForOldInventory: Boolean): Inventory {
 
         val oldInv = manager.getInventory(player)
         val listenersField = SmartInventory::class.java.getDeclaredField("listeners")
@@ -113,13 +113,17 @@ object Utils {
         setInventory.isAccessible = true
         listenersField.isAccessible = true
 
-        oldInv.ifPresent {
+        if (checkForOldInventory) oldInv.ifPresent {
             (listenersField.get(it) as List<InventoryListener<out Event>>)
                     .filter { listener: InventoryListener<out Event> -> listener.type == InventoryCloseEvent::class.java }
                     .forEach { listener: InventoryListener<out Event> ->
                         (listener as InventoryListener<InventoryCloseEvent>)
                                 .accept(InventoryCloseEvent(player.openInventory))
                     }
+
+        }
+
+        oldInv.ifPresent {
             setInventory.invoke(manager, player, null)
         }
 
@@ -139,11 +143,11 @@ object Utils {
     fun SmartInventory.openWithProperties(player: Player, properties: Map<String, Any>) {
         val newContents: InventoryContents = InventoryContents.Impl(this, player)
         newContents.pagination().page(0)
-        openWithContents(player, newContents) {
+        openWithContents(player, newContents, {
             for (entry in properties) {
                 it.setProperty(entry.key, entry.value)
             }
-        }
+        }, false)
     }
 
     fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents) {
@@ -176,6 +180,27 @@ object Utils {
 
     fun ItemStack.unhandledNBT(): MutableMap<String?, NBTBase?> {
         return getItemStackUnhandledNBT(this)
+    }
+
+    fun Inventory.availableSpace(item: ItemStack?): Int {
+        var space = 0
+        contents.forEach {
+            if (it == null || it.type == Material.AIR) {
+                space += 64
+            } else if (it.isSimilar(item)) {
+                space += 64 - it.amount
+            }
+        }
+        return space
+    }
+
+    fun Inventory.amount(item: ItemStack?): Int {
+        if (item == null) return 0
+        var count = 0
+        contents.forEach {
+            if (it.isSimilar(item)) count += it.amount
+        }
+        return count
     }
 
     fun getItemStackMetaReference(itemStack: ItemStack): ItemMeta {

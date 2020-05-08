@@ -3,116 +3,70 @@ package me.oriharel.playershops.shops.inventory
 import fr.minuskube.inv.ClickableItem
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
-import fr.minuskube.inv.content.InventoryProvider
 import me.oriharel.playershops.PlayerShops
-import me.oriharel.playershops.shops.shop.MoneyShop
 import me.oriharel.playershops.shops.shop.PlayerShop
-import me.oriharel.playershops.shops.shop.ShopType
+import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
-import me.oriharel.playershops.utilities.Utils.ifOnline
+import me.oriharel.playershops.utilities.Utils.modifyMeta
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
-import me.oriharel.playershops.utilities.Utils.toTitleCase
+import net.milkbowl.vault.economy.Economy
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 
-class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvider {
+open class PurchaseInventory(protected val economy: Economy) : NotUpdatableInventoryProvider {
 
     override fun init(player: Player, contents: InventoryContents) {
-        val shop = getShop(contents) as MoneyShop
+        contents.fill(ClickableItem.empty(InventoryConstants.Item.EMPTY_GRAY_STAINED_GLASS_PANE))
+        contents.fillRect(0, 3, 2, 5, ClickableItem.empty(InventoryConstants.Item.EMPTY_YELLOW_STAINED_GLASS_PANE))
+        contents.fillRow(3, ClickableItem.empty(InventoryConstants.Item.EMPTY_WHITE_STAINED_GLASS_PANE))
 
-        contents.fill(
-                ClickableItem.empty(
-                        KItemStack(
-                                material = Material.GRAY_STAINED_GLASS_PANE,
-                                displayName = ""
-                        )))
-
-        contents.set(0, 4,
-                ClickableItem.of(
-                        KItemStack(
-                                material = Material.LIME_STAINED_GLASS_PANE,
-                                displayName = "&a&l" + shop.getType().name,
-                                lore = listOf("&2${shop.getType().name}: &6${shop.price?.format()}")
-                        )) {
-                    playerShops.createSignInput(player, "&6Amount: &9", "&6&l${shop.getType()}") { _, strings ->
-                        val amount: Int? = strings[0].replace("\\D".toRegex(), "").toIntOrNull()
-                        // TESTME: Check if exiting the GUI exits the inventory as well
-                        handleAmountToPurchaseInput(contents, player, amount)
-                    }
-                })
-
-        contents.set(0, 8,
-                ClickableItem.of(
-                        KItemStack(
-                                material = Material.RED_STAINED_GLASS_PANE,
-                                displayName = "&c&lCANCEL TRANSACTION"
-                        )) {
-                    INVENTORY.close(it.whoClicked as Player)
-                    it.whoClicked.sendMessage("§c§l[!] §eCancelled transaction!")
-                })
+        contents.set(1, 4, ClickableItem.empty(getItemSoldBought(InventoryConstants.ConstantUtilities.getShop(contents))))
     }
 
-    override fun update(player: Player, contents: InventoryContents) {
 
+    protected fun getItemSoldBought(shop: PlayerShop?): ItemStack {
+        val clone = shop?.item?.clone()
+        val useMobCoins = shop?.settings?.contains(ShopSetting.USE_MOB_COINS) ?: false
+        val priceText = (if (!useMobCoins) "$" else "") + (shop?.price?.format()
+                ?: "n/a") + (if (useMobCoins) " Zen Coins" else "")
+        clone?.amount = 1
+
+        return clone?.modifyMeta {
+            if (it.lore == null) it.lore = mutableListOf()
+            it.lore!!.add("&e&l&o&m-----")
+            it.lore!!.add("&6&l* &e&lQuantity: &fx${shop.item?.amount?.minus(1)?.format() ?: 0} / x${shop.storageSize.format() ?: 0}")
+            it.lore!!.add("&6&l* &e&lPrice: &a$priceText")
+        } ?: KItemStack(
+                material = Material.BARRIER,
+                displayName = "&cAbsolutely nothing!"
+        )
     }
 
-    private fun handleAmountToPurchaseInput(contents: InventoryContents, player: Player, amount: Int?): Boolean {
-        val shop = getShop(contents)
+    protected fun getPurchaseMessage(shop: PlayerShop, prefixAmount: String, amount: Long, cost: Long, suffixCost: String): String {
+        val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
+        val costStr = (if (!useMobCoins) "$" else "") + (cost.format()) + (if (useMobCoins) " Zen Coins" else "")
+        return "§6§l[!] §ePlayer Shop $prefixAmount §f${amount.format()} §7${shop.item?.itemMeta?.displayName ?: "n/a"} §efor §a$costStr §e$suffixCost ${shop.owner?.toOfflinePlayer()?.name}"
+    }
 
-        // TESTME: Check if exiting the GUI exits the inventory as well
-        when {
-            amount == null -> {
-                player.sendMessage("§c&l[!] &eInvalid number!")
-                return true
-            }
-            amount < 0 -> {
-                player.sendMessage("§c&l[!] &ePrice must be a non-negative number!")
-                return true
-            }
-            amount > shop.item?.amount!! -> {
-                player.sendMessage("§c&l[!] &eThe owner does not have that amount in stock! Amount if stock - ${shop.item!!.amount}")
-                return true
-            }
-            else -> {
-                openConfirmationInventory(contents, player, amount)
-                return true
-            }
+    protected fun getFailMessage(purchaseReason: PurchaseReason): String {
+        return when (purchaseReason) {
+            PurchaseReason.NO_INVENTORY_SPACE -> "§4§l[!] §cYou do not have any free inventory space."
+            PurchaseReason.INSUFFICIENT_FUNDS -> "§4§l[!] §cInsufficient funds."
+            PurchaseReason.SHOP_EMPTY -> "§4§l[!] §cPlayer Shop is empty."
+            PurchaseReason.NO_SHOP_SPACE -> "§4§l[!] §cPlayer Shop is full."
+            PurchaseReason.SHOP_INSUFFICIENT_FUNDS -> "§4§l[!] §cShop is missing funds."
+            else -> throw NotImplementedError("Invalid PurchaseReason")
         }
     }
 
-    private fun openConfirmationInventory(contents: InventoryContents, player: Player, amount: Int) {
-        val shop = getShop(contents)
-        val shopType = shop.getType()
-        val owner = shop.owner?.toOfflinePlayer()
-        val inventory = ConfirmationInventory.INVENTORY
-
-        inventory.open(player)
-        inventory.manager.getContents(player).get().setProperty(InventoryConstants.ON_CLICK_CONTENT_ID) { it: ConfirmationType ->
-            if (it == ConfirmationType.CONFIRM) {
-                INVENTORY.close(player)
-                if (shopType == ShopType.BUY) {
-                    owner?.ifOnline {
-                        it.sendMessage("§b§l[INFO] §e${player.name} has just bought $amount of ${shop.item!!.type.toTitleCase()} from your shop!")
-                    }
-                    player.sendMessage("§b§l[INFO] §eYou have successfully sold $amount of ${shop.item!!.type.toTitleCase()}!")
-                } else if (shopType == ShopType.SELL) {
-                    owner?.ifOnline {
-                        it.sendMessage("§b§l[INFO] §e${player.name} has just sold $amount of ${shop.item!!.type.toTitleCase()} to you!")
-                    }
-                    player.sendMessage("§b§l[INFO] §eYou've successfully bought $amount!")
-                }
-                shop.run(amount, player)
-            } else {
-                INVENTORY.close(player)
-                player.sendMessage("§c§l[!] §eCancelled transaction!")
-            }
-        }
-
-    }
-
-    private fun getShop(contents: InventoryContents): PlayerShop {
-        return contents.property(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID)
+    protected fun getBuySellItem(material: Material, prefix: String, text: String, suffix: String, amount: String): ItemStack {
+        return KItemStack(
+                material = material,
+                displayName = "$prefix${text} $amount",
+                lore = listOf("&7&o(( Clicking this will buy &b&o&m$amount &7&o$suffix the shop ))")
+        )
     }
 
     companion object {
@@ -121,7 +75,7 @@ class PurchaseInventory(private val playerShops: PlayerShops) : InventoryProvide
                 .title(InventoryConstants.PurchaseInventory.TITLE)
                 .size(InventoryConstants.PurchaseInventory.ROWS, InventoryConstants.PurchaseInventory.COLUMNS)
                 .closeable(InventoryConstants.PurchaseInventory.CLOSEABLE)
-                .provider(PurchaseInventory(PlayerShops.INSTANCE))
+                .provider(PurchaseInventory(PlayerShops.INSTANCE.economy))
                 .manager(PlayerShops.INSTANCE.inventoryManager)
                 .build()
     }

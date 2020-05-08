@@ -11,6 +11,7 @@ import me.oriharel.playershops.utilities.Utils.giveItem
 import me.oriharel.playershops.utilities.Utils.openWithProperties
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
+import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
@@ -28,6 +29,43 @@ abstract class PlayerShop(
         val allowedMutators: MutableSet<UUID>,
         val settings: MutableSet<ShopSetting>
 ) {
+
+    /**
+     * checks whether the shop is stocked.
+     * removes one from amount since that one is shown as what the shop is holding
+     */
+    val isEmpty: Boolean
+        get() =
+            amountInStock <= 0
+
+    /**
+     * helper function for checking if the shop is stocked
+     */
+    val isNotEmpty: Boolean get() = !isEmpty
+
+    /**
+     * checks whether the shop is full.
+     * checks if the amount of the item of the shops is equal to or larger than the storage size
+     */
+    val isFull: Boolean get() = amountInStock >= storageSize
+
+    val isNotFull: Boolean get() = !isFull
+
+    val storageRemaining: Long get() = storageSize - amountInStock
+
+    /**
+     * wrapper for getting the amount the item in stock
+     */
+    val amountInStock: Long get() = item?.amount?.minus(1)?.toLong() ?: 0L
+
+    val balance: Number
+        get() {
+            val useInternalBank = settings.contains(ShopSetting.USE_INTERNAL_BANK)
+            val useMobCoins = settings.contains(ShopSetting.USE_MOB_COINS)
+            val ownerProfile = MobCoinsAPI.getProfileManager().getProfile(owner)
+
+            return if (useInternalBank) bank!!.balance else if (useMobCoins) ownerProfile.mobCoins else PlayerShops.INSTANCE.economy.getBalance(owner?.toOfflinePlayer())
+        }
 
     /**
      * What happens when the owner of a PlayerShop right clicks the PlayerShop
@@ -51,32 +89,6 @@ abstract class PlayerShop(
         owner = e.player.uniqueId
         block = e.block
         playerShops.shopManager.setPlayerShopBlockState(e.block, this)
-    }
-
-    fun buildHologram(playerShops: PlayerShops) {
-        val hologram = getHologram(playerShops)
-
-        var itemText = "§r§7" + (item?.itemMeta?.displayName ?: "§cAbsolutely nothing!")
-        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) storageSize - item!!.amount - 1 else if (this is SellShop) item!!.amount - 1 else ""})"
-        var index = 0
-        clearHologram(playerShops, hologram)
-
-        hologram.insertTextLine(index++, "§e${owner?.toOfflinePlayer()?.name} §dis ${getType().toTitleCase()}...")
-        hologram.insertTextLine(index++, itemText)
-        if (this is MoneyShop) hologram.insertTextLine(index++, "§fPrice: §a" + (if (!useZenCoins) "$" else "") + (price?.format()
-                ?: "n/a") + (if (useZenCoins) " Zen Coins" else ""))
-        hologram.insertItemLine(index, item)
-    }
-
-    fun clearHologram(playerShops: PlayerShops, hologram: Hologram? = null) {
-        val holo = hologram ?: getHologram(playerShops)
-        holo.clearLines()
-    }
-
-    private fun getHologram(playerShops: PlayerShops): Hologram {
-        val placeLoc = block?.location?.add(0.5, 2.5, 0.5)
-        return HologramsAPI.getHolograms(playerShops).find { it.location == placeLoc }
-                ?: HologramsAPI.createHologram(playerShops, placeLoc)
     }
 
     /**
@@ -120,6 +132,32 @@ abstract class PlayerShop(
         } else {
             openPlayerGUI(Bukkit.getPlayer(opener)!!)
         }
+    }
+
+    fun buildHologram(playerShops: PlayerShops) {
+        val hologram = getHologram(playerShops)
+
+        var itemText = "§r§7" + (item?.itemMeta?.displayName ?: "§cAbsolutely nothing!")
+        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) (storageSize - item!!.amount - 1).toString() else if (this is SellShop) (item!!.amount - 1).toString() else ""})"
+        var index = 0
+        clearHologram(playerShops, hologram)
+
+        hologram.insertTextLine(index++, "§e${owner?.toOfflinePlayer()?.name} §dis ${getType().toTitleCase()}...")
+        hologram.insertTextLine(index++, itemText)
+        if (this is MoneyShop) hologram.insertTextLine(index++, "§fPrice: §a" + (if (!useZenCoins) "$" else "") + (price?.format()
+                ?: "n/a") + (if (useZenCoins) " Zen Coins" else ""))
+        hologram.insertItemLine(index, item)
+    }
+
+    fun clearHologram(playerShops: PlayerShops, hologram: Hologram? = null) {
+        val holo = hologram ?: getHologram(playerShops)
+        holo.clearLines()
+    }
+
+    private fun getHologram(playerShops: PlayerShops): Hologram {
+        val placeLoc = block?.location?.add(0.5, 2.5, 0.5)
+        return HologramsAPI.getHolograms(playerShops).find { it.location == placeLoc }
+                ?: HologramsAPI.createHologram(playerShops, placeLoc)
     }
 
     override fun toString(): String {

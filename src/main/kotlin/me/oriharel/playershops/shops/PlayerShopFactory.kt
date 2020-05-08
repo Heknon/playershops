@@ -21,12 +21,12 @@ class PlayerShopFactory(private val economy: Economy) {
             bankInitialFunds: Long = 0,
             price: Long? = null
     ): T {
-        val bank: ShopBank? = if (settings.contains(ShopSetting.USE_INTERNAL_BANK))
-            if (settings.contains(ShopSetting.USE_MOB_COINS))
-                ZenCoinShopBank(bankInitialFunds)
-            else
-                VaultShopBank(bankInitialFunds, economy)
-        else null
+        val bank: ShopBank? =
+                if (settings.contains(ShopSetting.USE_MOB_COINS))
+                    ZenCoinShopBank(bankInitialFunds)
+                else
+                    VaultShopBank(bankInitialFunds, economy)
+
 
         return when (shopType) {
             ShopType.BUY -> BuyShop(bank, economy, price, storageSize, item, block, owner, mutableSetOf(), settings)
@@ -64,9 +64,12 @@ class PlayerShopFactory(private val economy: Economy) {
         val bankToUse: ShopBank? = bank ?: shop.bank
 
         return when (toType) {
-            ShopType.BUY -> BuyShop(bankToUse, economy, price ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SELL -> SellShop(bankToUse, economy, price ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SHOWCASE -> ShowcaseShop(bankToUse, price ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.BUY -> BuyShop(bankToUse, economy, price
+                    ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.SELL -> SellShop(bankToUse, economy, price
+                    ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
+            ShopType.SHOWCASE -> ShowcaseShop(bankToUse, price
+                    ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
         } as T
     }
 }

@@ -26,9 +26,9 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
             val shop = InventoryConstants.ConstantUtilities.getShop(contents) as MoneyShop
             val bank = shop.bank!!
             val useMobCoins = InventoryConstants.ConstantUtilities.getUseMobCoins(contents)
-                    ?: shop.settings?.contains(ShopSetting.USE_MOB_COINS)!!
+                    ?: shop.settings.contains(ShopSetting.USE_MOB_COINS)
             val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents)
-                    ?: shop.settings?.contains(ShopSetting.USE_INTERNAL_BANK)!!
+                    ?: shop.settings.contains(ShopSetting.USE_INTERNAL_BANK)
             InventoryConstants.ConstantUtilities.setUseBank(contents, useBank)
 
             contents.set(0, 8, ClickableItem.of(
@@ -162,9 +162,9 @@ class BankInventory(private val playerShops: PlayerShops) : InventoryProvider {
                     val useBank = InventoryConstants.ConstantUtilities.getUseBank(contents)!!
 
                     if (useBank) {
-                        shop.settings?.add(ShopSetting.USE_INTERNAL_BANK)
+                        shop.settings.add(ShopSetting.USE_INTERNAL_BANK)
                     } else {
-                        shop.settings?.remove(ShopSetting.USE_INTERNAL_BANK)
+                        shop.settings.remove(ShopSetting.USE_INTERNAL_BANK)
                     }
 
                     shop.buildHologram(PlayerShops.INSTANCE)

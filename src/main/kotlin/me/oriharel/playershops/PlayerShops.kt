@@ -5,6 +5,7 @@ import fr.minuskube.inv.InventoryManager
 import fr.minuskube.inv.SmartInventory
 import me.oriharel.playershops.listeners.Block
 import me.oriharel.playershops.listeners.Interact
+import me.oriharel.playershops.shops.inventory.SetItemListener
 import me.oriharel.playershops.shops.shop.ShopType
 import me.oriharel.playershops.utilities.SignMenuFactory
 import net.milkbowl.vault.economy.Economy
@@ -50,6 +51,7 @@ class PlayerShops : JavaPlugin() {
 
         Bukkit.getPluginManager().registerEvents(Interact(shopManager), this)
         Bukkit.getPluginManager().registerEvents(Block(shopManager), this)
+        Bukkit.getPluginManager().registerEvents(SetItemListener(inventoryManager), this)
 
 
     }

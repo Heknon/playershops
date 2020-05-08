@@ -23,11 +23,11 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
     override fun init(player: Player, contents: InventoryContents) {
         val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
 
-        contents.fillRect(0, 0, 2, 8, ClickableItem.empty(InventoryConstants.Item.EMPTY_GRAY_STAINED_GLASS_PANE))
+        contents.fill(ClickableItem.empty(InventoryConstants.Item.EMPTY_GRAY_STAINED_GLASS_PANE))
         contents.fillRect(0, 3, 2, 5, ClickableItem.empty(InventoryConstants.Item.EMPTY_YELLOW_STAINED_GLASS_PANE))
         contents.fillRow(3, ClickableItem.empty(InventoryConstants.Item.EMPTY_WHITE_STAINED_GLASS_PANE))
 
-        contents.set(1, 4, ClickableItem.of(getShopifiedItem(contents)) {
+        contents.set(1, 4, ClickableItem.of(getShopifiedItem(shop)) {
             if (shop.item == null) openSetItemInventory(player, contents)
             else openStorageInventory(player, contents)
         })
@@ -102,14 +102,11 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
         BankInventory.INVENTORY.openWithProperties(player, contents)
     }
 
-    private fun getShopifiedItem(contents: InventoryContents): ItemStack {
-        val currShopifiedItem = InventoryConstants.ConstantUtilities.getShopifiedItem(contents)
-        val shop = InventoryConstants.ConstantUtilities.getShop(contents)
-
-        return currShopifiedItem?.modifyMeta {
+    private fun getShopifiedItem(shop: PlayerShop): ItemStack {
+        return shop.item?.modifyMeta {
             if (it.lore == null) it.lore = mutableListOf()
             it.lore!!.add("&e&l&o&m-----")
-            it.lore!!.add("&6&l* &eQuantity: &fx${shop?.item?.amount?.minus(1)?.format() ?: 0} / x${shop?.storageSize?.format() ?: 0}")
+            it.lore!!.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
             it.lore!!.add("&o&7(( &fLeft Click &7to set the item ))")
             it.lore!!.add("&o&7(( &fRight Click &7to set the item ))")
         } ?: KItemStack(
@@ -121,15 +118,15 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
     private fun getPriceItem(shop: PlayerShop): ItemStack {
         val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
-        val price = if (!useMobCoins) "$" else "" + (shop.price?.format() ?: "n/a") + if (useMobCoins) " Zen Coins" else ""
+        val price = if (!useMobCoins && shop.price != null) "$" else "" + (shop.price?.format() ?: "n/a") + if (useMobCoins && shop.price != null) " Zen Coins" else ""
         return KItemStack(
                 material = Material.EMERALD,
-                displayName = "&2&l[!] &aSET PRICE &7(Click)",
+                displayName = "&2&l[!] &a&lSET PRICE &7(Click)",
                 lore = listOf(
                         "",
-                        "&2&l* &aCURRENT PRICE: &f$price",
+                        "&2&l* &a&lCURRENT PRICE: &f&l$price",
                         "",
-                        "&7&o(( &fClick &7to adjust the &aasking price",
+                        "&7&o(( &f&oClick &7to adjust the &a&oasking price",
                         "&7for your &cPlayer Shop&7. ))"
                 )
         )
@@ -159,23 +156,23 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
     private val bankItem: ItemStack = KItemStack(
             material = Material.JUKEBOX,
-            displayName = "&2&l[!] &aSHOP BANK",
+            displayName = "&2&l[!] &a&lSHOP BANK",
             lore = listOf(
                     "",
-                    "&7&o(( &fClick &7to open your &cPlayer Shop's &7bank&f. &7))"
+                    "&7&o(( &f&oClick &7to open your &c&oPlayer Shop's &7&obank&f&o. &7&o))"
             )
     )
 
 
     private val destructorItem: ItemStack = KItemStack(
             material = Material.BARRIER,
-            displayName = "&4&l[!] &cREMOVE SHOP &r&7(Click)",
+            displayName = "&4&l[!] &c&lREMOVE SHOP &r&7&l(Click)",
             lore = listOf(
                     "",
                     "&7Once clicked, your &cPlayer Shop will despawn&7,",
                     "&7and will be placed &ainto your inventory&7.",
                     "",
-                    "&b&oNOTE: &fYou must empty all of the contents first."
+                    "&b&oNOTE: &f&oYou must empty all of the contents first."
             )
     )
 
