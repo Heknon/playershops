@@ -35,7 +35,7 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
 
     /**
      * fetches a player shop from a block.
-     * if the player shop does not exist in the playershop cache, the data is fetched from the block, set in cache and returned.
+     * if the player shop does not exist in the PlayerShop cache, the data is fetched from the block, set in cache and returned.
      * the cache is reset on restart. this functionality provides better performance once a shop is already opened
      */
     fun getPlayerShopFromBlock(block: Block?): PlayerShop? {

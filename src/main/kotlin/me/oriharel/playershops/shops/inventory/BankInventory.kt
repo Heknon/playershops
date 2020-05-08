@@ -11,7 +11,6 @@ import me.oriharel.playershops.shops.shop.MoneyShop
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
-import me.oriharel.playershops.utilities.Utils.openWithContents
 import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Bukkit
 import org.bukkit.Material

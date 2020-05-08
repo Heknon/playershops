@@ -1,7 +1,6 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.ClickableItem
-import fr.minuskube.inv.InventoryListener
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import me.oriharel.playershops.PlayerShops
@@ -13,7 +12,6 @@ import me.oriharel.playershops.utilities.Utils.giveItem
 import me.oriharel.playershops.utilities.Utils.modifyMeta
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.ItemStack
 import kotlin.math.min
 

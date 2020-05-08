@@ -36,7 +36,7 @@ open class PurchaseInventory(protected val economy: Economy) : NotUpdatableInven
         return clone?.modifyMeta {
             if (it.lore == null) it.lore = mutableListOf()
             it.lore!!.add("&e&l&o&m-----")
-            it.lore!!.add("&6&l* &e&lQuantity: &fx${shop.item?.amount?.minus(1)?.format() ?: 0} / x${shop.storageSize.format() ?: 0}")
+            it.lore!!.add("&6&l* &e&lQuantity: &fx${shop.item?.amount?.minus(1)?.format() ?: 0} / x${shop.storageSize.format()}")
             it.lore!!.add("&6&l* &e&lPrice: &a$priceText")
         } ?: KItemStack(
                 material = Material.BARRIER,
@@ -47,7 +47,7 @@ open class PurchaseInventory(protected val economy: Economy) : NotUpdatableInven
     protected fun getPurchaseMessage(shop: PlayerShop, prefixAmount: String, amount: Long, cost: Long, suffixCost: String): String {
         val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
         val costStr = (if (!useMobCoins) "$" else "") + (cost.format()) + (if (useMobCoins) " Zen Coins" else "")
-        return "§6§l[!] §ePlayer Shop $prefixAmount §f${amount.format()} §7${shop.item?.itemMeta?.displayName ?: "n/a"} §efor §a$costStr §e$suffixCost ${shop.owner?.toOfflinePlayer()?.name}"
+        return "§6§l[!] §ePlayer Shop $prefixAmount §f${amount.format()} §7${shop.item?.itemMeta?.displayName ?: "n/a"}§e for §a$costStr §e$suffixCost ${shop.owner?.toOfflinePlayer()?.name}"
     }
 
     protected fun getFailMessage(purchaseReason: PurchaseReason): String {

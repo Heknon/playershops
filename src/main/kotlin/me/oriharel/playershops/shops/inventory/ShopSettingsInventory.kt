@@ -1,7 +1,6 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.ClickableItem
-import fr.minuskube.inv.InventoryListener
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import me.oriharel.playershops.PlayerShops
@@ -15,7 +14,6 @@ import me.oriharel.playershops.utilities.Utils.modifyMeta
 import me.oriharel.playershops.utilities.Utils.openWithProperties
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.ItemStack
 
 class ShopSettingsInventory : NotUpdatableInventoryProvider {
@@ -60,7 +58,8 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
     }
 
     private fun switchShopType(player: Player, shop: PlayerShop, contents: InventoryContents) {
-        val newShop = PlayerShops.INSTANCE.shopManager.shopFactory.convertShop(shop, shop.getType().next(), shop.bank ?: VaultShopBank(0, PlayerShops.INSTANCE.economy))
+        val newShop = PlayerShops.INSTANCE.shopManager.shopFactory.convertShop(shop, shop.getType().next(), shop.bank
+                ?: VaultShopBank(0, PlayerShops.INSTANCE.economy))
         InventoryConstants.ConstantUtilities.setShop(contents, newShop)
         shop.switch(newShop)
         init(player, contents)
@@ -118,7 +117,8 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
     private fun getPriceItem(shop: PlayerShop): ItemStack {
         val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
-        val price = if (!useMobCoins && shop.price != null) "$" else "" + (shop.price?.format() ?: "n/a") + if (useMobCoins && shop.price != null) " Zen Coins" else ""
+        val price = if (!useMobCoins && shop.price != null) "$" else "" + (shop.price?.format()
+                ?: "n/a") + if (useMobCoins && shop.price != null) " Zen Coins" else ""
         return KItemStack(
                 material = Material.EMERALD,
                 displayName = "&2&l[!] &a&lSET PRICE &7(Click)",
@@ -126,7 +126,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
                         "",
                         "&2&l* &a&lCURRENT PRICE: &f&l$price",
                         "",
-                        "&7&o(( &f&oClick &7to adjust the &a&oasking price",
+                        "&7&o(( &f&oClick &7to adjust the&a&o asking price",
                         "&7for your &cPlayer Shop&7. ))"
                 )
         )
@@ -159,7 +159,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
             displayName = "&2&l[!] &a&lSHOP BANK",
             lore = listOf(
                     "",
-                    "&7&o(( &f&oClick &7to open your &c&oPlayer Shop's &7&obank&f&o. &7&o))"
+                    "&7&o(( &f&oClick &7to open your &c&oPlayer Shop's&7&o bank&f&o. &7&o))"
             )
     )
 
@@ -170,7 +170,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
             lore = listOf(
                     "",
                     "&7Once clicked, your &cPlayer Shop will despawn&7,",
-                    "&7and will be placed &ainto your inventory&7.",
+                    "&7and will be placed&a into your inventory&7.",
                     "",
                     "&b&oNOTE: &f&oYou must empty all of the contents first."
             )

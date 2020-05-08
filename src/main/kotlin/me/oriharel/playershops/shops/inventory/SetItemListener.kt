@@ -1,7 +1,6 @@
 package me.oriharel.playershops.shops.inventory
 
 import fr.minuskube.inv.InventoryManager
-import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.utilities.Utils.openWithProperties
 import org.bukkit.Material
 import org.bukkit.entity.Player

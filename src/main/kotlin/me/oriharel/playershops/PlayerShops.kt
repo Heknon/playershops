@@ -2,7 +2,6 @@ package me.oriharel.playershops
 
 import co.aikar.commands.BukkitCommandManager
 import fr.minuskube.inv.InventoryManager
-import fr.minuskube.inv.SmartInventory
 import me.oriharel.playershops.listeners.Block
 import me.oriharel.playershops.listeners.Interact
 import me.oriharel.playershops.shops.inventory.SetItemListener

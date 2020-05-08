@@ -88,7 +88,7 @@ abstract class PlayerShop(
     fun onPlace(e: BlockPlaceEvent, playerShops: PlayerShops) {
         owner = e.player.uniqueId
         block = e.block
-        playerShops.shopManager.setPlayerShopBlockState(e.block, this)
+        update()
     }
 
     /**
@@ -120,11 +120,13 @@ abstract class PlayerShop(
      */
     fun update() {
         if (block != null) PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(block!!, this)
+        buildHologram(PlayerShops.INSTANCE)
     }
 
     fun getType(): ShopType {
         return if (this is BuyShop) ShopType.BUY else if (this is SellShop) ShopType.SELL else if (this is ShowcaseShop) ShopType.SHOWCASE else ShopType.BUY
     }
+
 
     fun open(opener: UUID) {
         if (opener == owner) {

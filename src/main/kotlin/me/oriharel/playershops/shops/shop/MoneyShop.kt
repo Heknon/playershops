@@ -28,8 +28,8 @@ abstract class MoneyShop(
         allowedMutators,
         settings
 ) {
-    protected val useInternalBank: Boolean = settings.contains(ShopSetting.USE_INTERNAL_BANK) ?: false
-    val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS) ?: false
+    protected val useInternalBank: Boolean = settings.contains(ShopSetting.USE_INTERNAL_BANK)
+    val useZenCoins: Boolean = settings.contains(ShopSetting.USE_MOB_COINS)
 
     override fun openPlayerGUI(player: Player) {
         PurchaseInventory.INVENTORY.open(player)

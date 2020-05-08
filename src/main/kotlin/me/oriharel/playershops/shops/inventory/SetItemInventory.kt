@@ -24,7 +24,7 @@ class SetItemInventory : NotUpdatableInventoryProvider {
                 displayName = "&4&l[!] &cSET SHOP ITEM &r&7(Information)",
                 lore = listOf(
                         "",
-                        "&fClick &7the item in your &ainventory &7that",
+                        "&fClick &7the item in your&a inventory &7that",
                         "&7you want to select for your &cPlayer Shop"
                 ),
                 metadataModifier = {
