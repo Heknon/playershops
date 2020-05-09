@@ -7,12 +7,15 @@ import fr.minuskube.inv.InventoryManager
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
 import me.oriharel.playershops.PlayerShops
+import me.oriharel.playershops.serializers.ItemStackTypeAdapter
 import me.oriharel.playershops.serializers.PlayerShopTypeAdapter
 import me.oriharel.playershops.serializers.ShopBankTypeAdapter
 import me.oriharel.playershops.serializers.UUIDTypeAdapter
 import me.oriharel.playershops.shops.PlayerShopFactory
 import me.oriharel.playershops.shops.bank.ShopBank
 import me.oriharel.playershops.shops.shop.PlayerShop
+import me.oriharel.playershops.utilities.message.Message
+import me.oriharel.playershops.utilities.message.Placeholder
 import net.milkbowl.vault.economy.Economy
 import net.minecraft.server.v1_15_R1.NBTBase
 import net.minecraft.server.v1_15_R1.NBTTagCompound
@@ -73,9 +76,20 @@ object Utils {
         if (item == null) return 0
         var amount = 0
         contents.forEach {
-            if (it.isSimilar(item)) amount += it.amount
+            if (it?.isSimilar(item) == true) {
+                amount += it.amount
+            }
         }
         return amount
+    }
+
+    fun Player.sendMessage(configName: String, configRoute: String, price: String = "") {
+        Message(
+                configName,
+                configRoute,
+                this,
+                Placeholder("%price%", price)
+        ).send()
     }
 
 
@@ -154,6 +168,12 @@ object Utils {
         openWithProperties(player, contents.getPropertiesReference())
     }
 
+    fun SmartInventory.openWithProperties(player: Player, properties: Map<String, Any>, delay: Long) {
+        Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
+            openWithProperties(player, properties)
+        }, delay)
+    }
+
     fun SmartInventory.openWithProperties(player: Player, contents: InventoryContents, delay: Long) {
         Bukkit.getScheduler().runTaskLater(PlayerShops.INSTANCE, Runnable {
             openWithProperties(player, contents)
@@ -182,7 +202,7 @@ object Utils {
         return getItemStackUnhandledNBT(this)
     }
 
-    fun Inventory.availableSpace(item: ItemStack?): Int {
+    fun Inventory.availableSpace(item: ItemStack? = null): Int {
         var space = 0
         contents.forEach {
             if (it == null || it.type == Material.AIR) {
@@ -204,15 +224,17 @@ object Utils {
     }
 
     fun getItemStackMetaReference(itemStack: ItemStack): ItemMeta {
-        if (!itemStack.hasItemMeta()) itemStack.itemMeta = ItemStack(itemStack.type, itemStack.amount).itemMeta
-        return ReflectionUtils.Fields.getFieldValueOfUnknownClass<ItemMeta>(itemStack, ItemStack::class.java, "meta")!!
+        val meta = ReflectionUtils.Fields.getFieldValueOfObject<ItemMeta>(itemStack, "meta")
+        if (meta == null) itemStack.itemMeta = ItemStack(itemStack.type, itemStack.amount).itemMeta
+        return ReflectionUtils.Fields.getFieldValueOfObject<ItemMeta>(itemStack, "meta")!!
     }
 
     fun ItemStack.modifyMeta(applier: ((ItemMeta) -> Unit)?): ItemStack {
-        val metaRef: ItemMeta = getItemStackMetaReference(this)
-        applier?.invoke(metaRef)
-        metaRef.setDisplayName(ChatColor.translateAlternateColorCodes('&', metaRef.displayName))
-        if (metaRef.lore != null) metaRef.lore = metaRef.lore?.map { ChatColor.translateAlternateColorCodes('&', it) }
+        val meta: ItemMeta = itemMeta!!
+        applier?.invoke(meta)
+        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', meta.displayName))
+        if (meta.lore != null) meta.lore = meta.lore?.map { ChatColor.translateAlternateColorCodes('&', it) }
+        itemMeta = meta
         return this
     }
 
@@ -255,6 +277,8 @@ object Utils {
     fun <BankType : ShopBank, ShopType : PlayerShop> getSerializer(economy: Economy, shopFactory: PlayerShopFactory): Gson {
         return GsonBuilder().registerTypeHierarchyAdapter(UUID::class.java, UUIDTypeAdapter())
                 .registerTypeHierarchyAdapter(ShopBank::class.java, ShopBankTypeAdapter<BankType>(economy))
-                .registerTypeHierarchyAdapter(PlayerShop::class.java, PlayerShopTypeAdapter<ShopType>(shopFactory)).create()
+                .registerTypeHierarchyAdapter(PlayerShop::class.java, PlayerShopTypeAdapter<ShopType>(shopFactory))
+                .registerTypeHierarchyAdapter(ItemStack::class.java, ItemStackTypeAdapter())
+                .create()
     }
 }

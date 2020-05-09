@@ -6,13 +6,16 @@ import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.bank.ShopBank
 import me.oriharel.playershops.shops.inventory.InventoryConstants
 import me.oriharel.playershops.shops.inventory.ShopSettingsInventory
+import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.giveItem
 import me.oriharel.playershops.utilities.Utils.openWithProperties
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
 import me.swanis.mobcoins.MobCoinsAPI
+import net.minecraft.server.v1_15_R1.NBTTagByte
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
@@ -29,6 +32,10 @@ abstract class PlayerShop(
         val allowedMutators: MutableSet<UUID>,
         val settings: MutableSet<ShopSetting>
 ) {
+
+    init {
+        if (price == -1L) price = null
+    }
 
     /**
      * checks whether the shop is stocked.
@@ -56,7 +63,7 @@ abstract class PlayerShop(
     /**
      * wrapper for getting the amount the item in stock
      */
-    val amountInStock: Long get() = item?.amount?.minus(1)?.toLong() ?: 0L
+    val amountInStock: Long get() = (if (item == null) 0 else item!!.amount - 1).toLong()
 
     val balance: Number
         get() {
@@ -65,6 +72,14 @@ abstract class PlayerShop(
             val ownerProfile = MobCoinsAPI.getProfileManager().getProfile(owner)
 
             return if (useInternalBank) bank!!.balance else if (useMobCoins) ownerProfile.mobCoins else PlayerShops.INSTANCE.economy.getBalance(owner?.toOfflinePlayer())
+        }
+
+    val itemName: String
+        get() = when {
+            item == null -> "§cAbsolutely nothing!"
+            this.item?.itemMeta?.displayName?.isBlank() == true -> this.item?.type?.toTitleCase()!!
+            else -> this.item?.itemMeta?.displayName
+                    ?: "§cAbsolutely nothing!"
         }
 
     /**
@@ -85,7 +100,7 @@ abstract class PlayerShop(
      */
     abstract fun run(amount: Int, player: Player)
 
-    fun onPlace(e: BlockPlaceEvent, playerShops: PlayerShops) {
+    fun onPlace(e: BlockPlaceEvent) {
         owner = e.player.uniqueId
         block = e.block
         update()
@@ -102,6 +117,7 @@ abstract class PlayerShop(
         clearHologram(playerShops)
         player?.giveItem(shopItem, false)
         shopManager.removePlayerShop(block)
+        block?.type = Material.AIR
     }
 
     /**
@@ -113,18 +129,21 @@ abstract class PlayerShop(
         clearHologram(playerShops)
         shopManager.removePlayerShop(block)
         shopManager.setPlayerShopBlockState(newShop.block!!, newShop)
+        newShop.buildHologram(PlayerShops.INSTANCE)
     }
 
     /**
      * updates the information of the machine stored in a block
      */
     fun update() {
-        if (block != null) PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(block!!, this)
-        buildHologram(PlayerShops.INSTANCE)
+        Bukkit.getScheduler().runTask(PlayerShops.INSTANCE, Runnable {
+            if (block != null) PlayerShops.INSTANCE.shopManager.setPlayerShopBlockState(block!!, this)
+            buildHologram(PlayerShops.INSTANCE)
+        })
     }
 
     fun getType(): ShopType {
-        return if (this is BuyShop) ShopType.BUY else if (this is SellShop) ShopType.SELL else if (this is ShowcaseShop) ShopType.SHOWCASE else ShopType.BUY
+        return if (this is BuyShop) ShopType.BUY else if (this is SellShop) ShopType.SELL else if (this is ShowShop) ShopType.SHOW else ShopType.BUY
     }
 
 
@@ -139,12 +158,15 @@ abstract class PlayerShop(
     fun buildHologram(playerShops: PlayerShops) {
         val hologram = getHologram(playerShops)
 
-        var itemText = "§r§7" + (item?.itemMeta?.displayName ?: "§cAbsolutely nothing!")
-        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) (storageSize - item!!.amount - 1).toString() else if (this is SellShop) (item!!.amount - 1).toString() else ""})"
+        val item = item?.clone() ?: KItemStack(material = Material.BARRIER, amount = 1)
+
+        item.amount = 1
+        var itemText = "§r§7$itemName"
+        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) storageRemaining.toString() else if (this is SellShop) amountInStock.toString() else ""})"
         var index = 0
         clearHologram(playerShops, hologram)
 
-        hologram.insertTextLine(index++, "§e${owner?.toOfflinePlayer()?.name} §dis ${getType().toTitleCase()}...")
+        hologram.insertTextLine(index++, "§e${owner?.toOfflinePlayer()?.name} §dis ${getType().toTitleCase()}ing...")
         hologram.insertTextLine(index++, itemText)
         if (this is MoneyShop) hologram.insertTextLine(index++, "§fPrice: §a" + (if (!useZenCoins) "$" else "") + (price?.format()
                 ?: "n/a") + (if (useZenCoins) " Zen Coins" else ""))
@@ -157,7 +179,7 @@ abstract class PlayerShop(
     }
 
     private fun getHologram(playerShops: PlayerShops): Hologram {
-        val placeLoc = block?.location?.add(0.5, 2.5, 0.5)
+        val placeLoc = block?.location?.add(0.5, 2.7, 0.5)
         return HologramsAPI.getHolograms(playerShops).find { it.location == placeLoc }
                 ?: HologramsAPI.createHologram(playerShops, placeLoc)
     }

@@ -3,7 +3,7 @@ package me.oriharel.playershops.shops.shop
 enum class ShopType(val value: Int) {
     BUY(0),
     SELL(1),
-    SHOWCASE(2);
+    SHOW(2);
 
     fun next(): ShopType {
         return values[(this.ordinal + 1) % values.size]

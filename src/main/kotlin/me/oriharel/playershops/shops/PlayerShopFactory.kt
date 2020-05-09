@@ -21,7 +21,7 @@ class PlayerShopFactory(private val economy: Economy) {
             bankInitialFunds: Long = 0,
             price: Long? = null
     ): T {
-        val bank: ShopBank? =
+        val bank: ShopBank =
                 if (settings.contains(ShopSetting.USE_MOB_COINS))
                     ZenCoinShopBank(bankInitialFunds)
                 else
@@ -31,7 +31,7 @@ class PlayerShopFactory(private val economy: Economy) {
         return when (shopType) {
             ShopType.BUY -> BuyShop(bank, economy, price, storageSize, item, block, owner, mutableSetOf(), settings)
             ShopType.SELL -> SellShop(bank, economy, price, storageSize, item, block, owner, mutableSetOf(), settings)
-            ShopType.SHOWCASE -> ShowcaseShop(bank, price, storageSize, item, block, owner, mutableSetOf(), settings)
+            ShopType.SHOW -> ShowShop(bank, price, storageSize, item, block, owner, mutableSetOf(), settings)
         } as T
     }
 
@@ -50,7 +50,7 @@ class PlayerShopFactory(private val economy: Economy) {
         return when (shopType) {
             ShopType.BUY -> BuyShop(bank, economy, price, storageSize, itemStack, block, owner, allowedMutators, settings)
             ShopType.SELL -> SellShop(bank, economy, price, storageSize, itemStack, block, owner, allowedMutators, settings)
-            ShopType.SHOWCASE -> ShowcaseShop(bank, price, storageSize, itemStack, block, owner, allowedMutators, settings)
+            ShopType.SHOW -> ShowShop(bank, price, storageSize, itemStack, block, owner, allowedMutators, settings)
         } as T
     }
 
@@ -68,7 +68,7 @@ class PlayerShopFactory(private val economy: Economy) {
                     ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
             ShopType.SELL -> SellShop(bankToUse, economy, price
                     ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
-            ShopType.SHOWCASE -> ShowcaseShop(bankToUse, price
+            ShopType.SHOW -> ShowShop(bankToUse, price
                     ?: shop.price, shop.storageSize, shop.item, shop.block, shop.owner, shop.allowedMutators, shop.settings)
         } as T
     }

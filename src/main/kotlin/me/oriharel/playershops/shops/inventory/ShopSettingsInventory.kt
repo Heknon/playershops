@@ -12,6 +12,8 @@ import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.modifyMeta
 import me.oriharel.playershops.utilities.Utils.openWithProperties
+import me.oriharel.playershops.utilities.Utils.sendMessage
+import me.oriharel.playershops.utilities.Utils.toTitleCase
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -25,8 +27,9 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
         contents.fillRect(0, 3, 2, 5, ClickableItem.empty(InventoryConstants.Item.EMPTY_YELLOW_STAINED_GLASS_PANE))
         contents.fillRow(3, ClickableItem.empty(InventoryConstants.Item.EMPTY_WHITE_STAINED_GLASS_PANE))
 
+
         contents.set(1, 4, ClickableItem.of(getShopifiedItem(shop)) {
-            if (shop.item == null) openSetItemInventory(player, contents)
+            if (shop.item == null || it.isLeftClick) openSetItemInventory(player, contents)
             else openStorageInventory(player, contents)
         })
 
@@ -51,10 +54,11 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
     private fun destroyShop(player: Player, shop: PlayerShop) {
         if (shop.item?.amount != null && shop.item?.amount!! > 1) {
-            player.sendMessage("§4§l[!] §cClear out your storage before removing your shop.")
+            player.sendMessage("messages.yml", "ClearStorageToDestroyShop")
             return
         }
         shop.destroy(player)
+        INVENTORY.close(player)
     }
 
     private fun switchShopType(player: Player, shop: PlayerShop, contents: InventoryContents) {
@@ -70,7 +74,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
             val price = strings[0].toLongOrNull()
 
             if (price == null || price < 0) {
-                p.sendMessage("§4§l[!] §r§cYou need to enter a price!")
+                p.sendMessage("messages.yml", "ShopChangePrice_PlayerDidntEnterPrice")
                 return@createSignInput true
             }
 
@@ -79,7 +83,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
             val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
             val priceText = (if (!useMobCoins) "$" else "") + price.format() + (if (useMobCoins) " Zen Coins" else "") + "."
-            p.sendMessage("§6§l[!] §ePlayer Shop price set to $priceText")
+            p.sendMessage("messages.yml", "PlayerShopPriceSet", priceText)
 
             contents.set(3, 5, ClickableItem.of(getPriceItem(shop)) {
                 changePrice(player, shop, contents)
@@ -102,12 +106,15 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
     }
 
     private fun getShopifiedItem(shop: PlayerShop): ItemStack {
-        return shop.item?.modifyMeta {
-            if (it.lore == null) it.lore = mutableListOf()
-            it.lore!!.add("&e&l&o&m-----")
-            it.lore!!.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
-            it.lore!!.add("&o&7(( &fLeft Click &7to set the item ))")
-            it.lore!!.add("&o&7(( &fRight Click &7to set the item ))")
+        val clone = shop.item?.clone()
+        clone?.amount = 1
+        return clone?.modifyMeta {
+            val lore = it.lore ?: mutableListOf()
+            lore.add("&e&l&o&m-----")
+            lore.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
+            lore.add("&o&7(( &fLeft Click &7to set the item ))")
+            lore.add("&o&7(( &fRight Click &7to access storage ))")
+            it.lore = lore
         } ?: KItemStack(
                 material = Material.BARRIER,
                 displayName = "&cAbsolutely nothing!",
@@ -117,8 +124,8 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
 
     private fun getPriceItem(shop: PlayerShop): ItemStack {
         val useMobCoins = shop.settings.contains(ShopSetting.USE_MOB_COINS)
-        val price = if (!useMobCoins && shop.price != null) "$" else "" + (shop.price?.format()
-                ?: "n/a") + if (useMobCoins && shop.price != null) " Zen Coins" else ""
+        val price = (if (!useMobCoins && shop.price != null) "$" else "") + (shop.price?.format()
+                ?: "n/a") + (if (useMobCoins && shop.price != null) " Zen Coins" else "")
         return KItemStack(
                 material = Material.EMERALD,
                 displayName = "&2&l[!] &a&lSET PRICE &7(Click)",
@@ -139,9 +146,10 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
                 displayName = "&5&l[!] &dSET SHOP MODE &r&7(Click)",
                 lore = listOf(
                         "",
-                        getText("Buying", type == ShopType.BUY, "&5&l*"),
-                        getText("Selling", type == ShopType.SELL, "&5&l*"),
-                        getText("Showcasing", type == ShopType.SHOWCASE, "&5&l*"),
+                        *List(ShopType.values().size) {
+                            val t = ShopType.findByValue(it)
+                            getText(t?.toTitleCase() + "ing", t == type)
+                        }.toTypedArray(),
                         "",
                         "&7&o(( &fClick &7to cycle between modes ))"
                 )
@@ -150,7 +158,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
     }
 
     private fun getText(text: String, highlighted: Boolean, prefix: String = ""): String {
-        return if (highlighted) "$prefix &6⟩ &f$text &6⟨&r" else "$prefix &7$text"
+        return if (highlighted) "$prefix &6> &f$text &6<&r" else "$prefix &7$text"
     }
 
 

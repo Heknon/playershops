@@ -1,0 +1,7 @@
+ClearStorageToDestroyShop: "&4&l[!] &cClear out your storage before removing your shop."
+
+ShopChangePrice_PlayerDidntEnterPrice: "&4&l[!] &r&cYou need to enter a price!"
+
+PlayerShopPriceSet: "&6&l[!] &ePlayer Shop price set to %price%"
+
+NoInventorySpace: "§4§l[!] §cYou do not have any free inventory space."

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
-internal class ShowcaseShop(
+internal class ShowShop(
         bank: ShopBank?,
         price: Long?,
         storageSize: Long,

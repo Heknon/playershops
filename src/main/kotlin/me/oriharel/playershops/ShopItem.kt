@@ -2,6 +2,7 @@ package me.oriharel.playershops
 
 import com.google.gson.Gson
 import me.oriharel.playershops.shops.shop.PlayerShop
+import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.getNBTClone
 import me.oriharel.playershops.utilities.Utils.modifyMeta
 import me.oriharel.playershops.utilities.Utils.updateNBT
@@ -26,7 +27,7 @@ class ShopItem : ItemStack {
         }
     }
 
-    constructor(shop: PlayerShop, playerShops: PlayerShops, serializer: Gson) : super(getDefaultShopItem(playerShops)) {
+    constructor(shop: PlayerShop, playerShops: PlayerShops, serializer: Gson) : super(getDefaultShopItem(playerShops, shop)) {
         this.shop = shop
         updateNBT {
             it["playerShop"] = NBTTagString.a(serializer.toJson(shop, shop.javaClass))
@@ -40,15 +41,15 @@ class ShopItem : ItemStack {
          * @param force whether or not should overwrite cache
          */
         @JvmOverloads
-        fun getDefaultShopItem(playerShops: PlayerShops, force: Boolean = false): ItemStack {
+        fun getDefaultShopItem(playerShops: PlayerShops, shop: PlayerShop, force: Boolean = false): ItemStack {
             if (shopItemCache != null && !force) return shopItemCache!!
 
             val configLoad: YamlConfiguration = playerShops.getConfig("config.yml")!!
 
-            val lore: List<String> = configLoad.getStringList("shop_default_lore").map { ChatColor.translateAlternateColorCodes('&', it) }
+            val lore: List<String> = configLoad.getStringList("shop_default_lore").map { ChatColor.translateAlternateColorCodes('&', it.replace("%storage%", shop.storageSize.format())) }
             val material: Material = Material.getMaterial(configLoad.getString("shop_default_material") ?: "")
                     ?: throw RuntimeException("Invalid default shop material! You must have a valid material in config.yml")
-            val displayName: String? = configLoad.getString("shop_default_display_name")
+            val displayName: String? = configLoad.getString("shop_default_display_name")?.replace("%storage%", shop.storageSize.format())
             val item = ItemStack(material, 1)
             if (lore.isNotEmpty() || displayName != null) item.modifyMeta {
                 it.lore = lore

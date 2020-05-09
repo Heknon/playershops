@@ -1,5 +1,10 @@
 shop_default_material: ENCHANTING_TABLE
 shop_default_lore: [
-  "&7This is a shop"
+  "",
+  "&7Player shops allow players to buy or sell",
+  "&7items from you. Place down this item to begin!",
+  "",
+  "&4&l* &c&lSTORAGE: &fx%storage%",
+  ""
 ]
-shop_default_display_name: "&6PLAYER SHOP"
+shop_default_display_name: "&4&l[!] &c&lPLAYER SHOP &7(Place Down)"

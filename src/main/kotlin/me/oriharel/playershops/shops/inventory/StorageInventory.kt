@@ -6,6 +6,7 @@ import fr.minuskube.inv.content.InventoryContents
 import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.utilities.KItemStack
+import me.oriharel.playershops.utilities.Utils.availableSpace
 import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.getItemAmountInInventory
 import me.oriharel.playershops.utilities.Utils.giveItem
@@ -18,91 +19,99 @@ import kotlin.math.min
 class StorageInventory : NotUpdatableInventoryProvider {
 
     override fun init(player: Player, contents: InventoryContents) {
-        val shop = InventoryConstants.ConstantUtilities.getShop(contents)
+        val shop = InventoryConstants.ConstantUtilities.getShop(contents)!!
 
         contents.fill(ClickableItem.empty(InventoryConstants.Item.EMPTY_LIGHT_GRAY_STAINED_GLASS_PANE))
-        contents.set(1, 4, ClickableItem.empty(getShopifiedItem(contents)))
+        contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
 
         contents.set(1, 0, ClickableItem.of(getWithdrawDepositItem("-", "ALL")) {
-            withdrawRoutine(player, shop, shop?.item?.amount)
-            deployWithdrawMessage(player, shop?.item?.amount?.toLong(), shop)
+            deployWithdrawMessage(player, withdrawRoutine(player, shop, shop.item?.amount).toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
         contents.set(1, 1, ClickableItem.of(getWithdrawDepositItem("-", "64")) {
-            withdrawRoutine(player, shop, 64)
-            deployWithdrawMessage(player, 64, shop)
+            deployWithdrawMessage(player, withdrawRoutine(player, shop, 64).toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
         contents.set(1, 2, ClickableItem.of(getWithdrawDepositItem("-", "1")) {
-            withdrawRoutine(player, shop, 1)
-            deployWithdrawMessage(player, 1, shop)
+            deployWithdrawMessage(player, withdrawRoutine(player, shop, 1).toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
 
         contents.set(1, 6, ClickableItem.of(getWithdrawDepositItem("+", "1")) {
-            depositRoutine(player, shop, 1)
-            deployDepositMessage(player, 1, shop)
+            val amountDeposited = depositRoutine(player, shop, 1)
+            sendDepositMessage(player, amountDeposited.toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
         contents.set(1, 7, ClickableItem.of(getWithdrawDepositItem("+", "64")) {
-            depositRoutine(player, shop, 64)
-            deployDepositMessage(player, 64, shop)
-
+            sendDepositMessage(player, depositRoutine(player, shop, 64).toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
         contents.set(1, 8, ClickableItem.of(getWithdrawDepositItem("+", "ALL")) {
-            val amount = it.inventory.getItemAmountInInventory(shop?.item).toLong()
-            depositRoutine(player, shop, amount)
-            deployDepositMessage(player, amount, shop)
+            val amount = it.view.bottomInventory.getItemAmountInInventory(shop.item).toLong()
+            sendDepositMessage(player, depositRoutine(player, shop, amount).toLong(), shop)
+            contents.set(1, 4, ClickableItem.empty(getShopifiedItem(shop)))
         })
 
     }
 
-    private fun depositRoutine(player: Player, shop: PlayerShop?, amount: Long) {
+    private fun depositRoutine(player: Player, shop: PlayerShop, amount: Long): Int {
         var amountRemainingToFetch = amount
+        var amountDeposited = 0
 
         player.inventory.contents.forEach {
-            if (it.isSimilar(shop?.item)) {
-                val amountToFetch: Int = min(it.amount, amountRemainingToFetch.toInt()) // not to take above the amount the item has
+            if (it?.isSimilar(shop.item) == true) {
+                val amountToDeposit: Int = min(it.amount, amountRemainingToFetch.toInt()) // not to take above the amount the item has
 
-                it.amount -= amountToFetch
-                shop?.item?.amount = shop?.item?.amount?.plus(amountToFetch) ?: 0
+                it.amount -= amountToDeposit
+                shop.item!!.amount += amountToDeposit
+                amountDeposited += amountToDeposit
 
-                amountRemainingToFetch -= amountToFetch
+                amountRemainingToFetch -= amountToDeposit
 
                 if (amountRemainingToFetch <= 0) {
-                    shop?.update()
-                    return
+                    if (amountDeposited != 0) shop.update()
+                    return amountDeposited
                 }
             }
         }
-        shop?.update()
+        if (amountDeposited != 0) shop.update()
+        return amountDeposited
     }
 
     /**
-     * @return returns true if the withdraw was successful and the item was given. returns false if shop doesn't have enough to give
+     * @return returns amount withdrawn
      */
-    private fun withdrawRoutine(player: Player, shop: PlayerShop?, amount: Int?): Boolean {
-        if (amount == null) return false
-        if (shop?.item?.amount ?: amount < amount) {
-            return false
-        }
+    private fun withdrawRoutine(player: Player, shop: PlayerShop, amount: Int?): Int {
+        if (amount == null) return -1
 
-        val cloneToGive = shop?.item?.clone()
-        shop?.item?.amount = shop?.item?.amount?.minus(amount) ?: 0
-        cloneToGive?.amount = amount
+        val amountToWithdraw = min(min(amount, shop.amountInStock.toInt()), player.inventory.availableSpace(shop.item))
+        val cloneToGive = shop.item?.clone()
+
+        shop.item!!.amount -= amountToWithdraw
+        cloneToGive?.amount = amountToWithdraw
+
         if (cloneToGive != null) player.giveItem(cloneToGive)
-        shop?.update()
-        return true
+        if (amountToWithdraw != 0) shop.update()
+
+        return amountToWithdraw
     }
 
-    private fun getShopifiedItem(contents: InventoryContents): ItemStack? {
-        val shopifiedItem = InventoryConstants.ConstantUtilities.getShopifiedItem(contents)
-        val shop = InventoryConstants.ConstantUtilities.getShop(contents)
-
-        return shopifiedItem?.modifyMeta {
-            if (it.lore == null) it.lore = mutableListOf()
-            it.lore!!.add("&e&l&o&m-----")
-            it.lore!!.add("&6&l* &eQuantity: &fx${shop?.item?.amount?.minus(1)?.format() ?: 0} / x${shop?.storageSize?.format() ?: 0}")
+    private fun getShopifiedItem(shop: PlayerShop): ItemStack? {
+        val clone = shop.item!!.clone()
+        clone.amount = 1
+        return clone.modifyMeta {
+            var lore = it.lore
+            if (lore == null) {
+                it.lore = mutableListOf()
+                lore = it.lore!!
+            }
+            lore.add("&e&l&o&m-----")
+            lore.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
+            it.lore = lore
         }
     }
 
-    private fun deployDepositMessage(player: Player, amount: Long?, shop: PlayerShop?) {
+    private fun sendDepositMessage(player: Player, amount: Long?, shop: PlayerShop?) {
         deployStorageMessage(player, "deposited", amount, shop)
     }
 
@@ -111,7 +120,7 @@ class StorageInventory : NotUpdatableInventoryProvider {
     }
 
     private fun deployStorageMessage(player: Player, holder: String, amount: Long?, shop: PlayerShop?) {
-        player.sendMessage("§6§l[!] &r&eYou $holder &fx${amount?.format()} §7${shop?.item?.itemMeta?.displayName ?: "n/a"}§f.")
+        player.sendMessage("§6§l[!] §r§eYou $holder §fx${amount?.format()} §7${shop?.itemName ?: "n/a"}§f.")
     }
 
     private fun getWithdrawDepositItem(sign: String, amount: String): ItemStack {

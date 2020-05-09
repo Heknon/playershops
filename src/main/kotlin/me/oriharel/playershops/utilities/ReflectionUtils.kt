@@ -17,15 +17,16 @@ class ReflectionUtils {
          * @param <R>       the type of the field
          * @return the value or null if not found
         </R> */
-        fun <R> getFieldValueOfObject(instance: Any, fieldName: String?): R? {
-            try {
-                val field = instance.javaClass.getDeclaredField(fieldName)
-                field.isAccessible = true
-                return field[instance] as R
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
+        fun <R> getFieldValueOfObject(instance: Any, fieldName: String): R? {
+            var clazz: Class<*> = instance::class.java
+            while (clazz != Any::class.java) {
+                try {
+                    val field = clazz.getDeclaredField(fieldName)
+                    field.isAccessible = true
+                    return field[instance] as R
+                } catch (e: NoSuchFieldException) {
+                    clazz = clazz.superclass
+                }
             }
             return null
         }
@@ -38,7 +39,7 @@ class ReflectionUtils {
          * @param <R>       the type of the field
          * @return the value or null if not found
         </R> */
-        fun <R, T> getFieldValueOfObjectExact(instance: T, fieldName: String?): R? {
+        fun <R, T> getFieldValueOfObjectExact(instance: T, fieldName: String): R? {
             try {
                 val field = object : TypeToken<T>() {}.javaClass.getDeclaredField(fieldName)
                 field.isAccessible = true
@@ -60,17 +61,10 @@ class ReflectionUtils {
          * @param <R>       the type of the field
          * @return the value or null if not found
         </R> */
-        fun <R> getFieldValueOfUnknownClass(instance: Any?, clazz: Class<*>, fieldName: String?): R? {
-            try {
-                val field = clazz.getDeclaredField(fieldName)
-                field.isAccessible = true
-                return field[instance] as R
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            }
-            return null
+        fun <R> getFieldValueOfUnknownClass(instance: Any?, clazz: Class<*>, fieldName: String): R? {
+            val field = clazz.getDeclaredField(fieldName)
+            field.isAccessible = true
+            return field[instance] as R
         }
 
         /**
@@ -82,19 +76,10 @@ class ReflectionUtils {
          * @param <R>       the type of the field
          * @return the value or null if not found
         </R> */
-        fun <R> getFieldValueOfUnknownClass(instance: Any?, className: String?, fieldName: String?): R? {
-            try {
-                val field = Class.forName(className).getDeclaredField(fieldName)
-                field.isAccessible = true
-                return field[instance] as R
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            } catch (e: ClassNotFoundException) {
-                e.printStackTrace()
-            }
-            return null
+        fun <R> getFieldValueOfUnknownClass(instance: Any?, className: String, fieldName: String): R? {
+            val field = Class.forName(className).getDeclaredField(fieldName)
+            field.isAccessible = true
+            return field[instance] as R
         }
 
         /**
@@ -104,13 +89,8 @@ class ReflectionUtils {
          * @param fieldName the field name
          * @return the value or null if not found
          */
-        fun getField(instance: Any, fieldName: String?): Field? {
-            try {
-                return instance.javaClass.getDeclaredField(fieldName)
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            }
-            return null
+        fun getField(instance: Any, fieldName: String): Field? {
+            return instance.javaClass.getDeclaredField(fieldName)
         }
 
         /**
@@ -120,7 +100,7 @@ class ReflectionUtils {
          * @param fieldName the field name
          * @return the value or null if not found
          */
-        fun getField(clazz: Class<*>, fieldName: String?): Field? {
+        fun getField(clazz: Class<*>, fieldName: String): Field? {
             try {
                 return clazz.getDeclaredField(fieldName)
             } catch (e: NoSuchFieldException) {
@@ -136,16 +116,23 @@ class ReflectionUtils {
          * @param fieldName the field name
          * @return the value or null if not found
          */
-        fun getField(className: String?, fieldName: String?): Field? {
-            try {
-                return Class.forName(className).getDeclaredField(fieldName)
-            } catch (e: NoSuchFieldException) {
-                e.printStackTrace()
-            } catch (e: ClassNotFoundException) {
-                e.printStackTrace()
-            }
-            return null
+        fun getField(className: String?, fieldName: String): Field? {
+            return Class.forName(className).getDeclaredField(fieldName)
         }
+
+        fun <T> setFieldValue(instance: Any, fieldName: String, value: T) {
+            val field = getField(instance, fieldName)
+            field?.isAccessible = true
+            field?.set(instance, value)
+        }
+
+        fun <T> setAndGetFieldValue(instance: Any, fieldName: String, value: T): T? {
+            val field = getField(instance, fieldName)
+            field?.isAccessible = true
+            field?.set(instance, value)
+            return getFieldValueOfObject<T>(instance, fieldName)
+        }
+
     }
 
     object Methods {
@@ -158,7 +145,7 @@ class ReflectionUtils {
          * @param <R>        the type of return value
          * @return the return value or null
         </R> */
-        fun <R> executeMethod(instance: Any, methodName: String?, vararg parameters: Class<*>?): R? {
+        fun <R> executeMethod(instance: Any, methodName: String, vararg parameters: Class<*>?): R? {
             try {
                 val method = instance.javaClass.getDeclaredMethod(methodName, *parameters)
                 method.isAccessible = true

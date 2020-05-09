@@ -3,8 +3,11 @@ package me.oriharel.playershops
 import me.oriharel.playershops.shops.PlayerShopFactory
 import me.oriharel.playershops.shops.bank.ShopBank
 import me.oriharel.playershops.shops.shop.PlayerShop
+import me.oriharel.playershops.shops.shop.ShopSetting
+import me.oriharel.playershops.shops.shop.ShopType
 import me.oriharel.playershops.utilities.Utils
 import me.oriharel.playershops.utilities.Utils.toLong
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockState
@@ -33,6 +36,23 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
         }
     }
 
+    fun constructNewShop(shopType: ShopType, storageSize: Long, vararg shopSettings: ShopSetting): PlayerShop {
+        return constructNewShop(shopType, shopSettings.toMutableSet(), storageSize)
+    }
+
+    internal fun constructNewShop(shopType: ShopType, settings: MutableSet<ShopSetting>, storageSize: Long): PlayerShop {
+        return shopFactory.createNewShop(
+                shopType,
+                null,
+                null,
+                null,
+                settings,
+                storageSize,
+                0,
+                null
+        )
+    }
+
     /**
      * fetches a player shop from a block.
      * if the player shop does not exist in the PlayerShop cache, the data is fetched from the block, set in cache and returned.
@@ -49,7 +69,7 @@ class PlayerShopManager(internal val playerShops: PlayerShops) {
                 return worldCache[loc]!!
             }
 
-            val shop: PlayerShop? = getPlayerShopFromBlock(block)
+            val shop: PlayerShop? = getPlayerShopFromBlockState(block)
 
             if (shop != null) worldCache[loc] = shop
             if (shop == null) playerShops.logger.fine("PlayerShop not found at block $block")

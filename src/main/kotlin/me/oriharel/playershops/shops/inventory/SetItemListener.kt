@@ -18,8 +18,11 @@ class SetItemListener(private val inventoryManager: InventoryManager) : Listener
 
         inventoryManager.getContents(e.whoClicked as Player).ifPresent {
             val shop = InventoryConstants.ConstantUtilities.getShop(it)!!
-            shop.item = e.currentItem
+            val clone = e.currentItem?.clone()
+            clone?.amount = 1
+            shop.item = clone
             shop.update()
+            SetItemInventory.INVENTORY.close(e.whoClicked as Player)
             ShopSettingsInventory.INVENTORY.openWithProperties(e.whoClicked as Player, mutableMapOf(Pair(InventoryConstants.PASSED_DOWN_SHOP_CONTENT_ID, shop)))
         }
     }
