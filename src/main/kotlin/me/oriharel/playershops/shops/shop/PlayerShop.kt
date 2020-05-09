@@ -13,7 +13,6 @@ import me.oriharel.playershops.utilities.Utils.openWithProperties
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
 import me.swanis.mobcoins.MobCoinsAPI
-import net.minecraft.server.v1_15_R1.NBTTagByte
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Block

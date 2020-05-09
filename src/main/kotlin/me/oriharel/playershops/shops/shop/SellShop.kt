@@ -2,6 +2,7 @@ package me.oriharel.playershops.shops.shop
 
 import me.oriharel.playershops.shops.bank.ShopBank
 import me.oriharel.playershops.utilities.Utils.giveItem
+import me.oriharel.playershops.utilities.Utils.sendMessage
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
 import me.oriharel.playershops.utilities.Utils.toTitleCase
 import me.swanis.mobcoins.MobCoinsAPI
@@ -47,7 +48,7 @@ internal class SellShop(
             if (useZenCoins) {
                 val profile = MobCoinsAPI.getProfileManager().getProfile(player)
                 if (profile.mobCoins - amount < 0) {
-                    player.sendMessage("§c§l[!] §eInsufficient funds! Missing ${kotlin.math.abs(profile.mobCoins - amount)} zen coins!")
+                    player.sendMessage("messages.yml", "InsufficientFunds")
                     return
                 }
                 val profileOwner = MobCoinsAPI.getProfileManager().getProfile(owner)
@@ -55,7 +56,7 @@ internal class SellShop(
                 profileOwner.mobCoins = profileOwner.mobCoins + amount
             } else {
                 if (economy.getBalance(player) - amount.toDouble() < 0) {
-                    player.sendMessage("§c§l[!] §eInsufficient funds! Missing ${kotlin.math.abs(economy.getBalance(player) - amount)}!")
+                    player.sendMessage("messages.yml", "InsufficientFunds")
                     return
                 }
                 economy.withdrawPlayer(player, amount.toDouble())

@@ -10,6 +10,7 @@ import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.modifyMeta
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
+import me.oriharel.playershops.utilities.message.Message
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -50,13 +51,13 @@ open class PurchaseInventory(protected val economy: Economy) : NotUpdatableInven
         return "§6§l[!] §ePlayer Shop $prefixAmount §f${amount.format()} §7${shop.item?.itemMeta?.displayName ?: "n/a"}§e for §a$costStr §e$suffixCost ${shop.owner?.toOfflinePlayer()?.name}"
     }
 
-    protected fun getFailMessage(purchaseReason: PurchaseReason): String {
+    protected fun getFailMessage(purchaseReason: PurchaseReason): String? {
         return when (purchaseReason) {
-            PurchaseReason.NO_INVENTORY_SPACE -> "§4§l[!] §cYou do not have any free inventory space."
-            PurchaseReason.INSUFFICIENT_FUNDS -> "§4§l[!] §cInsufficient funds."
-            PurchaseReason.SHOP_EMPTY -> "§4§l[!] §cPlayer Shop is empty."
-            PurchaseReason.NO_SHOP_SPACE -> "§4§l[!] §cPlayer Shop is full."
-            PurchaseReason.SHOP_INSUFFICIENT_FUNDS -> "§4§l[!] §cShop is missing funds."
+            PurchaseReason.NO_INVENTORY_SPACE -> Message.getConfigMessage("messages.yml", "NoInventorySpace")
+            PurchaseReason.INSUFFICIENT_FUNDS -> Message.getConfigMessage("messages.yml", "InsufficientFunds")
+            PurchaseReason.SHOP_EMPTY -> Message.getConfigMessage("messages.yml", "ShopEmptyCannotPurchase")
+            PurchaseReason.NO_SHOP_SPACE -> Message.getConfigMessage("messages.yml", "ShopFull")
+            PurchaseReason.SHOP_INSUFFICIENT_FUNDS -> Message.getConfigMessage("messages.yml", "ShopHasInsufficientFunds")
             else -> throw NotImplementedError("Invalid PurchaseReason")
         }
     }

@@ -83,13 +83,39 @@ object Utils {
         return amount
     }
 
-    fun Player.sendMessage(configName: String, configRoute: String, price: String = "") {
+    fun Player.sendMessage(
+            configName: String,
+            configRoute: String,
+            price: String = "",
+            amount: String = "",
+            thing: String = "",
+            shopOwner: String = ""
+    ) {
         Message(
                 configName,
                 configRoute,
                 this,
-                Placeholder("%price%", price)
+                *getDefaultPlaceholders(price, amount, thing, shopOwner)
         ).send()
+    }
+
+    fun String.applyPlaceholders(vararg placeholders: Placeholder): String {
+        return Message(this, *placeholders).appliedText
+    }
+
+    fun String.applyPlaceholders(price: String = "", amount: String = "", thing: String, shopOwner: String = ""): String {
+        return this.applyPlaceholders(
+                *getDefaultPlaceholders(price, amount, thing, shopOwner)
+        )
+    }
+
+    private fun getDefaultPlaceholders(price: String = "", amount: String = "", thing: String, shopOwner: String = ""): Array<Placeholder> {
+        return arrayOf(
+                Placeholder("%price%", price),
+                Placeholder("%amount%", amount),
+                Placeholder("%thing%", thing),
+                Placeholder("%shop_owner%", shopOwner)
+        )
     }
 
 

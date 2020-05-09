@@ -7,7 +7,6 @@ import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.shops.shop.ShopType
 import me.oriharel.playershops.utilities.Utils
 import me.oriharel.playershops.utilities.Utils.toLong
-import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.block.BlockState

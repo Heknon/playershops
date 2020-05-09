@@ -4,4 +4,32 @@ ShopChangePrice_PlayerDidntEnterPrice: "&4&l[!] &r&cYou need to enter a price!"
 
 PlayerShopPriceSet: "&6&l[!] &ePlayer Shop price set to %price%"
 
-NoInventorySpace: "§4§l[!] §cYou do not have any free inventory space."
+NoInventorySpace: "&4&l[!] &cYou do not have any free inventory space."
+
+InsufficientFunds: "&4&l[!] &cInsufficient funds."
+
+InsufficientBankFunds: "&b&l[!] &eYou don't have enough funds in the &cPlayer Shop &ebank to withdraw that amount!"
+
+ShopEmptyCannotPurchase: "&4&l[!] &cPlayer Shop is empty."
+
+ShopFull: "&4&l[!] &cPlayer Shop is full."
+
+ShopHasInsufficientFunds: "§4§l[!] §cShop is missing funds."
+
+BuyMessage: "&6&l[!] &ePlayer Shop bought %amount% §7%thing%§e for &a%price% &efrom %shop_owner%"
+
+SellMessage: "&6&l[!] &ePlayer Shop sold %amount% §7%thing%§e for &a%price% &eto %shop_owner%"
+
+DepositAttemptToUnDepositableShop: "&c&l[!] &eYou cannot deposit into this shop! Try changing the shop type!"
+
+InvalidNumber: "&4&l[!] &eInvalid number!"
+
+DepositToBank: "&4&l[!] &eYou've deposited %amount% into your shop's bank"
+
+WithdrawFromBank: "&b&l[!] §eYou've withdrawn %amount% from your shop's bank"
+
+WithdrawFromStorage: "&6&l[!] &r&eYou withdraw &fx%amount% &7%thing%&f."
+
+DepositToStorage: "&6&l[!] &r&eYou deposited &fx%amount% &7%thing%&f."
+
+PurchaseAttemptOwnerHasInsufficientFunds: "&c&l[!] &eInsufficient funds! You are missing %amount% %thing%! Players can no longer buy from your shop!"

@@ -10,12 +10,12 @@ import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.KItemStack
 import me.oriharel.playershops.utilities.Utils.format
+import me.oriharel.playershops.utilities.Utils.sendMessage
 import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.ItemStack
-import kotlin.math.abs
 
 class BankInventory(private val playerShops: PlayerShops) : NotUpdatableInventoryProvider {
 
@@ -60,7 +60,7 @@ class BankInventory(private val playerShops: PlayerShops) : NotUpdatableInventor
                                 displayName = "&3DEPOSIT"
                         )) {
                     if (shop !is Depositable) {
-                        player.sendMessage("§c§l[!] §eYou cannot deposit into this shop!")
+                        player.sendMessage("messages.yml", "DepositAttemptToUnDepositableShop")
                         return@of
                     }
                     handleDeposit(player, shop, contents)
@@ -84,20 +84,20 @@ class BankInventory(private val playerShops: PlayerShops) : NotUpdatableInventor
 
             when {
                 amount == null -> {
-                    player.sendMessage("§b§l[INFO] §eYou must enter a valid number to deposit!")
+                    player.sendMessage("messages.yml", "InvalidNumber")
                     return@createSignInput true
                 }
                 amount < 0 -> {
-                    player.sendMessage("§b§l[INFO] §eYou must enter a number above zero!")
+                    player.sendMessage("messages.yml", "InvalidNumber")
                     return@createSignInput true
                 }
                 userBal - amount < 0 -> {
-                    player.sendMessage("§b§l[INFO] §eInsufficient funds! You are missing ${abs(userBal - amount).format()}")
+                    player.sendMessage("messages.yml", "InsufficientFunds")
                     return@createSignInput true
                 }
                 else -> {
                     shop.bank!!.takeFromAndDeposit(amount, player.uniqueId)
-                    player.sendMessage("§b§l[INFO] §eYou've deposited ${amount.format()} into your shop's bank")
+                    player.sendMessage("messages.yml", "DepositToBank")
                     init(player, contents)
                     return@createSignInput true
                 }
@@ -117,20 +117,20 @@ class BankInventory(private val playerShops: PlayerShops) : NotUpdatableInventor
 
             when {
                 amount == null -> {
-                    player.sendMessage("§b§l[INFO] §eYou must enter a valid number to withdraw!")
+                    player.sendMessage("messages.yml", "InvalidNumber")
                     return@createSignInput true
                 }
                 amount < 0 -> {
-                    player.sendMessage("§b§l[INFO] §eYou must enter a number above zero!")
+                    player.sendMessage("messages.yml", "InvalidNumber")
                     return@createSignInput true
                 }
                 shop.bank!!.balance - amount < 0 -> {
-                    player.sendMessage("§b§l[INFO] §eYou don't have enough funds in the bank to withdraw that amount!")
+                    player.sendMessage("messages.yml", "InsufficientBankFunds", amount = amount.format())
                     return@createSignInput true
                 }
                 else -> {
                     shop.bank!!.giveToAndWithdraw(amount, player.uniqueId)
-                    player.sendMessage("§b§l[INFO] §eYou've withdrawn ${amount.format()} from your shop's bank")
+                    player.sendMessage("messages.yml", "WithdrawFromBank", amount = amount.format())
                     init(player, contents)
                     return@createSignInput true
                 }

@@ -86,7 +86,8 @@ class Message : Text {
         private val CONFIG_MESSAGE_CACHE: MutableMap<String, String?> = HashMap()
         private val CONFIG_CACHE: MutableMap<String, YamlConfiguration?> = HashMap()
 
-        fun getConfigMessage(configName: String, routeName: String): String? = handleConfigCache(configName, routeName)
+        fun getConfigMessage(configName: String, routeName: String): String? =
+                ChatColor.translateAlternateColorCodes('&', handleConfigCache(configName, routeName)!!)
 
         private fun handleConfigCache(configName: String, routeName: String): String? {
             val configLoad: YamlConfiguration? = CONFIG_CACHE[configName]

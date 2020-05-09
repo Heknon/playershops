@@ -36,9 +36,13 @@ class PlayerShops : JavaPlugin() {
             return
         }
 
-        val file = dataFolder.toPath().resolve("config.yml")
-        if (!Files.exists(file)) {
+        val config = dataFolder.toPath().resolve("config.yml")
+        val messages = dataFolder.toPath().resolve("messages.yml")
+        if (!Files.exists(config)) {
             saveDefaultConfig()
+        }
+        if (!Files.exists(messages)) {
+            this.saveResource("messages.yml", false)
         }
 
 

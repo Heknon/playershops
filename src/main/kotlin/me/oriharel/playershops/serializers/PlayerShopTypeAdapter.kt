@@ -8,7 +8,6 @@ import me.oriharel.playershops.shops.shop.*
 import me.oriharel.playershops.utilities.Utils.toBukkitWorld
 import me.oriharel.playershops.utilities.Utils.toLocation
 import me.oriharel.playershops.utilities.Utils.toLong
-import org.bukkit.Bukkit
 import org.bukkit.inventory.ItemStack
 import java.lang.reflect.Type
 import java.util.*

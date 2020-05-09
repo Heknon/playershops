@@ -7,7 +7,10 @@ import me.oriharel.playershops.PlayerShops
 import me.oriharel.playershops.shops.shop.PlayerShop
 import me.oriharel.playershops.shops.shop.ShopSetting
 import me.oriharel.playershops.utilities.Utils.amount
+import me.oriharel.playershops.utilities.Utils.applyPlaceholders
+import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.toOfflinePlayer
+import me.oriharel.playershops.utilities.message.Message
 import me.swanis.mobcoins.MobCoinsAPI
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -35,7 +38,7 @@ class SellInventory : PurchaseInventory(PlayerShops.INSTANCE.economy) {
     private fun sellItems(player: Player, shop: PlayerShop, amount: Long) {
         val pair = handleSellItems(player, shop, amount)
         if (pair.first != PurchaseReason.SUCCESS) {
-            player.sendMessage(getFailMessage(pair.first))
+            player.sendMessage(getFailMessage(pair.first) ?: "null")
         } else {
             player.sendMessage(getSellMessage(shop, amount))
         }
@@ -66,7 +69,14 @@ class SellInventory : PurchaseInventory(PlayerShops.INSTANCE.economy) {
         return Pair(PurchaseReason.SUCCESS, amountToSell)
     }
 
-    private fun getSellMessage(shop: PlayerShop, amount: Long) = getPurchaseMessage(shop, "sold", amount, amount * shop.price!!, "to")
+    private fun getSellMessage(shop: PlayerShop, amount: Long) = Message.getConfigMessage("messages.yml", "SellMessage")
+            ?.applyPlaceholders(
+                    amount = amount.format(),
+                    thing = shop.itemName,
+                    price = (amount * (shop.price ?: 0)).toString(),
+                    shopOwner = shop.owner?.toOfflinePlayer()?.name ?: "null"
+            ) ?: ""
+
     private fun getSellItem(amount: String) = getBuySellItem(Material.RED_STAINED_GLASS_PANE, "&c&l", "Sell", "to", amount)
 
     companion object {

@@ -11,6 +11,7 @@ import me.oriharel.playershops.utilities.Utils.format
 import me.oriharel.playershops.utilities.Utils.getItemAmountInInventory
 import me.oriharel.playershops.utilities.Utils.giveItem
 import me.oriharel.playershops.utilities.Utils.modifyMeta
+import me.oriharel.playershops.utilities.Utils.sendMessage
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -111,17 +112,12 @@ class StorageInventory : NotUpdatableInventoryProvider {
         }
     }
 
-    private fun sendDepositMessage(player: Player, amount: Long?, shop: PlayerShop?) {
-        deployStorageMessage(player, "deposited", amount, shop)
-    }
+    private fun sendDepositMessage(player: Player, amount: Long?, shop: PlayerShop?) = player.sendMessage("messages.yml", "DepositToStorage", amount = amount?.format()
+            ?: "0", thing = shop?.itemName ?: "n/a")
 
-    private fun deployWithdrawMessage(player: Player, amount: Long?, shop: PlayerShop?) {
-        deployStorageMessage(player, "withdrew", amount, shop)
-    }
+    private fun deployWithdrawMessage(player: Player, amount: Long?, shop: PlayerShop?) = player.sendMessage("messages.yml", "WithdrawFromStorage", amount = amount?.format()
+            ?: "0", thing = shop?.itemName ?: "n/a")
 
-    private fun deployStorageMessage(player: Player, holder: String, amount: Long?, shop: PlayerShop?) {
-        player.sendMessage("§6§l[!] §r§eYou $holder §fx${amount?.format()} §7${shop?.itemName ?: "n/a"}§f.")
-    }
 
     private fun getWithdrawDepositItem(sign: String, amount: String): ItemStack {
         val color = if (sign == "-") "&c&l" else "&a&l"
