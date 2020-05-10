@@ -111,7 +111,7 @@ class ShopSettingsInventory : NotUpdatableInventoryProvider {
         return clone?.modifyMeta {
             val lore = it.lore ?: mutableListOf()
             lore.add("&e&l&o&m-----")
-            lore.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
+            lore.add("&6&l* &eQuantity: &f" + if (!shop.isInfiniteStorage) "x${shop.amountInStock} / x${shop.storageSize.format()}" else "∞")
             lore.add("&o&7(( &fLeft Click &7to set the item ))")
             lore.add("&o&7(( &fRight Click &7to access storage ))")
             it.lore = lore

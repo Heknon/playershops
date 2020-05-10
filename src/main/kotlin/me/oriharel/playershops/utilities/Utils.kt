@@ -256,6 +256,8 @@ object Utils {
     }
 
     fun ItemStack.modifyMeta(applier: ((ItemMeta) -> Unit)?): ItemStack {
+        print(this)
+        print(itemMeta)
         val meta: ItemMeta = itemMeta!!
         applier?.invoke(meta)
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', meta.displayName))

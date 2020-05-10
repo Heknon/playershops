@@ -1,5 +1,6 @@
 package me.oriharel.playershops.shops.inventory
 
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import fr.minuskube.inv.ClickableItem
 import fr.minuskube.inv.SmartInventory
 import fr.minuskube.inv.content.InventoryContents
@@ -61,7 +62,7 @@ class StorageInventory : NotUpdatableInventoryProvider {
 
         player.inventory.contents.forEach {
             if (it?.isSimilar(shop.item) == true) {
-                val amountToDeposit: Int = min(it.amount, amountRemainingToFetch.toInt()) // not to take above the amount the item has
+                val amountToDeposit: Int = min(min(it.amount, amountRemainingToFetch.toInt()), shop.storageRemaining.toInt()) // not to take above the amount the item has
 
                 it.amount -= amountToDeposit
                 shop.item!!.amount += amountToDeposit
@@ -107,7 +108,7 @@ class StorageInventory : NotUpdatableInventoryProvider {
                 lore = it.lore!!
             }
             lore.add("&e&l&o&m-----")
-            lore.add("&6&l* &eQuantity: &fx${shop.amountInStock} / x${shop.storageSize.format()}")
+            lore.add("&6&l* &eQuantity: &f" + if (!shop.isInfiniteStorage) "x${shop.amountInStock} / x${shop.storageSize.format()}" else "∞")
             it.lore = lore
         }
     }

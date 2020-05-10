@@ -57,6 +57,8 @@ abstract class PlayerShop(
 
     val isNotFull: Boolean get() = !isFull
 
+    val isInfiniteStorage: Boolean = storageSize == Long.MAX_VALUE
+
     val storageRemaining: Long get() = storageSize - amountInStock
 
     /**
@@ -154,14 +156,14 @@ abstract class PlayerShop(
         }
     }
 
-    fun buildHologram(playerShops: PlayerShops) {
+    private fun buildHologram(playerShops: PlayerShops) {
         val hologram = getHologram(playerShops)
 
         val item = item?.clone() ?: KItemStack(material = Material.BARRIER, amount = 1)
 
         item.amount = 1
         var itemText = "§r§7$itemName"
-        if (this is MoneyShop) itemText += " §r§f(x${if (this is BuyShop) storageRemaining.toString() else if (this is SellShop) amountInStock.toString() else ""})"
+        if (this is MoneyShop) itemText += if (isInfiniteStorage) " §r§f(∞)" else " §r§f(x${if (this is BuyShop) storageRemaining.toString() else if (this is SellShop) amountInStock.toString() else ""})"
         var index = 0
         clearHologram(playerShops, hologram)
 
